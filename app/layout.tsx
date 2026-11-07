@@ -31,7 +31,8 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt" className={`${display.variable} ${body.variable} ${hand.variable}`}>
-      <body>{children}</body>
+      {/* suppressHydrationWarning: extensões como o Grammarly acrescentam atributos ao <body> */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }
