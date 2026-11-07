@@ -158,21 +158,17 @@ Na 2.ª visita (para a confirmação final), a introdução **não se repete à 
 | Etapa | Quando | Pergunta | Respostas |
 |---|---|---|---|
 | **1. Intenção** | Ao receber o convite | «Contas estar connosco?» | Sim, conto ir · Não vou conseguir · *(e quantas pessoas, se tiver lugares extra)* |
-| **2. Confirmação final** | Até **15/11/2026, 23:59 (hora de Luanda)** | «Confirmas definitivamente a tua presença?» | Confirmo · Afinal não posso |
+| **2. Confirmação final** | Quando o admin a **abrir** (Definições → «Pedir a confirmação final») | «Confirmam/Confirmas definitivamente a presença?» | Prime e segura para carimbar · Afinal não posso |
 
-- Quem disse «Não» na etapa 1 pode mudar de ideias até ao prazo.
-- Após o prazo, o cartão fica bloqueado («O prazo terminou; fala com a família») — o administrador pode reabrir individualmente.
-- Campo opcional: **mensagem de parabéns para a Juceline** (o admin vê todas). *Sugestão — confirma se queres.*
+- **Sem prazo fixo** (decisão tua): a etapa 2 só aparece quando o admin a abre. Pode-se definir uma data-limite opcional; depois dela o cartão fica bloqueado («fala com a família»).
+- Quem disse «Não» pode mudar de ideias enquanto a confirmação estiver aberta.
+- **Casais e famílias recebem um só convite** com o nome de todos (como nos casamentos) e os lugares respectivos; na resposta escolhem quantos vão («Vamos os dois / Vou só eu»). Os textos passam automaticamente para o plural.
+- **Mensagem de parabéns para a Juceline** (o admin vê todas no separador Mensagens).
 
 ### 5.2 Estados que o admin vê
 `Por enviar` → `Enviado` → `Aberto` (1.ª visita registada) → `Intenção: Sim / Não` → `Final: Confirmado / Recusado / Sem resposta` · e ainda `Substituído` e `Lista de espera`.
 
-### 5.3 ⚠️ Problema de calendário
-Hoje é **7 de Novembro**; o prazo final é **15 de Novembro** — **8 dias**. Duas etapas em 8 dias é muito apertado, e o convite completo (personagem + animações) leva vários dias a construir.
-
-Proposta (escolhe uma):
-- **A) Manter 15/11** → construo **primeiro o sistema (admin + RSVP + convite elegante mas simples)** para enviares os convites em ~2–3 dias; a experiência cinematográfica entra a seguir no **mesmo link**, e os convidados vêem-na quando voltam para a confirmação final.
-- **B) Adiar o prazo final** (ex.: 20/11) → envio o convite já com a experiência completa.
+O «Aberto» só conta quando uma pessoa abre o convite no browser — a pré-visualização do WhatsApp (o robô que lê o link) não conta.
 
 ---
 
@@ -203,10 +199,11 @@ Proposta (escolhe uma):
 4. **Revogar/regenerar link** com um clique (link reencaminhado indevidamente deixa de funcionar).
 5. **Supabase com RLS activado em todas as tabelas e nenhuma permissão pública**: o browser do convidado nunca fala directamente com a base de dados; só o servidor (rotas Next.js na Vercel) o faz, com a chave de serviço que nunca sai do servidor.
 6. **Cada link só vê os dados do próprio convidado** (nome, lugares, estado). Nunca a lista de convidados.
-7. **Admin** com Supabase Auth (e-mail + palavra-passe forte) + tabela de administradores autorizados; páginas admin bloqueadas no servidor.
-8. `noindex` em todo o site, sem analytics de terceiros, pré-visualização do WhatsApp genérica (sem nome do convidado nem morada).
-9. Limite de tentativas nas rotas de RSVP e validação de todos os campos no servidor.
-10. **Nenhum dado de convidados vai para o GitHub** (nem ficheiros de exemplo com nomes reais). Recomendo que o repositório seja **privado**.
+7. **Admin** com uma palavra-passe forte, guardada só como *hash* **scrypt** na variável `ADMIN_PASSWORD_HASH`, e sessão num cookie assinado (HMAC, HttpOnly, SameSite=strict, 7 dias). Mais simples do que Supabase Auth e sem contas extra. Páginas e rotas admin verificadas no servidor.
+8. `noindex` em todo o site, sem analytics de terceiros. A **pré-visualização do WhatsApp** mostra o nome do convidado (só quem tem o link a vê) mas **nunca a morada**.
+9. `Referrer-Policy: no-referrer` — o token não passa para o Google Maps/Waze quando se toca num botão.
+10. Limite de tentativas nas rotas de RSVP e de login, e validação de todos os campos no servidor.
+11. **Nenhum dado de convidados vai para o GitHub** (nem ficheiros de exemplo com nomes reais). Recomendo que o repositório seja **privado**.
 
 ---
 
@@ -221,9 +218,9 @@ Desenhada para usar no telemóvel também.
 - **Lembrete** para quem ainda não fez a confirmação final (mensagem pronta).
 - **Substituições**: marcar lugar como libertado → escolher alguém da lista de espera → gerar convite novo, com ligação "substitui X".
 - **Mensagens de parabéns** recebidas.
-- **Importação inicial** da tua lista (`documentos_detalhes/ListaDeConvidados.txt`): 59 convites, 1 por linha. Linhas com dois nomes (casais, «X e Y», «X & Y», «e Esposa») ficam com **2 lugares**; as restantes com 1 → **76 pessoas** no total. Rever antes de gerar links (notei «(Casacos)» na linha 12 — será «Casados»?; e «Vovó e Avó Terezinha» na 32 — será «Vovô»?).
-  A importação é feita por um script local que lê o ficheiro e escreve directamente no Supabase. **O ficheiro nunca entra no repositório.**
-- **Definições**: data/hora, morada e coordenadas, prazo, capacidade, textos.
+- **Importação inicial** da tua lista (`documentos_detalhes/ListaDeConvidados.txt`): 59 convites, 1 por linha. Linhas com dois nomes («X e Y», «X & Y») ou «(Casados)» ficam com **2 lugares**; as restantes com 1 → **76 pessoas** no total. As linhas 12 e 32 já foram corrigidas.
+  A importação faz-se no separador **Importar** do admin: colas a lista, vês a pré-visualização e confirmas. **O ficheiro nunca entra no repositório.**
+- **Definições**: hora, nome do local, morada e coordenadas (cola do Google Maps), capacidade, abrir a confirmação final (+ data-limite opcional), dress code.
 - **Exportar CSV**.
 
 ---
@@ -231,10 +228,11 @@ Desenhada para usar no telemóvel também.
 ## 9. Arquitectura técnica
 
 - **Next.js (App Router) + TypeScript**, alojado na **Vercel**.
-- **Supabase**: Postgres + Auth (só para o admin). Nada mais.
-- Animação: **GSAP** (ScrollTrigger, SplitText, DrawSVG, MorphSVG, Flip, CustomEase) — já instalado; canvas 2D leve para partículas.
-- Imagem de partilha do WhatsApp gerada com **satori / next/og**.
-- Som *(opcional)*: pequenos efeitos reais (passos, whoosh, papel, laço), sempre com botão de silêncio.
+- **Supabase**: só Postgres, acedido apenas pelo servidor. Sem Auth.
+- Em desenvolvimento, sem variáveis do Supabase, os dados ficam num ficheiro local (`.data/db.json`, ignorado pelo Git).
+- Animação: **GSAP** (ScrollTrigger, SplitText); canvas 2D leve para os confettis.
+- Imagem de partilha do WhatsApp gerada com **next/og** (1200×630, personalizada por convite).
+- Som: efeitos sintetizados no próprio browser (WebAudio), sem ficheiros, com botão de silêncio.
 
 ### Estrutura de pastas (prevista)
 ```
@@ -255,9 +253,8 @@ JuceceLineInvite/
 
 ### Modelo de dados (resumo)
 - `guests` — nome, nome no convite, telefone, grupo, lugares, `token_hash`, `token_enc`, enviado/aberto (datas e n.º de visitas), etapa 1 (resposta, lugares, data), etapa 2 (resposta, data), mensagem, substitui/substituído por, lista de espera, notas.
-- `event_settings` — uma linha: data/hora, local, coordenadas, prazo, capacidade.
+- `event_settings` — uma linha: hora, local, coordenadas, confirmação final aberta/fechada, data-limite opcional, capacidade, dress code.
 - `rsvp_log` — histórico de cada resposta (para saber quem mudou de ideias).
-- `admins` — utilizadores autorizados.
 
 ---
 
@@ -298,15 +295,19 @@ Os plugins `supabase` e `vercel` estão desligados neste projecto. Se quiseres, 
 
 ---
 
-## 12. Perguntas para ti
+## 12. Decisões e pontos em aberto
 
-1. **Prazo:** opção A (sistema primeiro, mantém 15/11) ou B (adiar o prazo final)?
-2. **Cabelo da Juceline** e, se possível, uma foto de referência (fica local).
-3. **Hora da festa** e **local** (podes dar depois no admin — não precisas de ma escrever aqui).
-4. **Lugares:** proponho 1 lugar por nome da lista (casais = 2). Há convites com filhos ou acompanhante extra?
-5. **Dress code:** a paleta é o dress code da festa? (A imagem diz "1/7" — há mais imagens?)
-6. **Som:** queres efeitos sonoros (com botão de silêncio)?
-7. **Extras:** mensagem de parabéns · balancete divertido (com dados teus) · contagem decrescente. Quais queres?
-8. **Instituição:** «ISAF — Academia BAI» serve?
-9. **Admin:** quem vai ter acesso (e-mails)?
-10. **Endereço do site:** um subdomínio grátis da Vercel (ex.: `juceline.vercel.app`) serve?
+**Decidido:**
+- Sem prazo de confirmação: a etapa 2 abre-se no admin quando quiseres.
+- Casais recebem um só convite com os dois nomes; linhas 12 e 32 da lista corrigidas.
+- Pré-visualização personalizada no WhatsApp.
+- Tudo testado localmente; a publicação (Vercel + Supabase) faz-se numa sessão própria — ver `docs/DEPLOY.md`.
+
+**Em aberto (preenche no admin → Definições, sem mexer no código):**
+- Hora da festa, nome do local, morada e coordenadas.
+- Capacidade (opcional).
+
+**Assumido (diz se queres mudar):**
+- Cabelo da Juceline em tranças, na personagem.
+- A paleta da imagem é o dress code da festa (a secção pode ser desligada nas Definições).
+- Som sintetizado, desligável.
