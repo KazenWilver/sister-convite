@@ -13,6 +13,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // A pasta-mãe tem outro package-lock.json; a raiz do projecto é esta.
+  turbopack: { root: import.meta.dirname },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

@@ -25,3 +25,6 @@ Thumbs.db
 
 # base local de desenvolvimento
 .data/
+
+# ferramentas locais
+.claude/

@@ -44,7 +44,7 @@ export function clampSeats(n: unknown): number {
   return Number.isFinite(v) ? Math.min(10, Math.max(1, v)) : 1;
 }
 
-/** Lê a linha de uma lista ("Lóide e Taviano Muxito (casados)") e devolve o convite. */
+/** Lê a linha de uma lista ("Ana e Paulo Mendes (casados)") e devolve o convite. */
 export function parseGuestLine(raw: string) {
   let line = raw.replace(/^\s*\d+\s*[.)\-–]\s+/, "").replace(/\s+/g, " ").trim();
   if (!line) return null;

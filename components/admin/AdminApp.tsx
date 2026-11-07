@@ -69,7 +69,7 @@ function waLink(g: AdminGuest, kind: "invite" | "reminder"): string | null {
   const p = g.seats > 1;
   const text =
     kind === "invite"
-      ? `Olá, ${g.displayName}! 🎓\n\nA Juceline terminou a licenciatura em Contabilidade e Finanças e queremos muito celebrar ${p ? "convosco" : "contigo"}.\n\nO convite é pessoal ${p ? "e é para os dois" : ""} — abre aqui:\n${g.link}`
+      ? `Olá, ${g.displayName}! 🎓\n\nA Juceline terminou a licenciatura em Contabilidade e Finanças e queremos muito celebrar ${p ? "convosco" : "contigo"}.\n\nO convite é pessoal ${g.seats === 2 ? "e é para os dois" : p ? "e é para todos" : ""} — abre aqui:\n${g.link}`
       : `Olá, ${g.displayName}! A festa da Juceline está a chegar 🎓\n\nFalta só a ${p ? "vossa" : "tua"} confirmação final — é rapidinho, aqui no convite:\n${g.link}`;
   let digits = (g.phone ?? "").replace(/\D/g, "");
   if (/^9\d{8}$/.test(digits)) digits = `244${digits}`; // número angolano sem indicativo
@@ -372,10 +372,10 @@ function ImportPanel({ onDone }: { onDone: (n: number) => void }) {
     <section className="adm-panel">
       <h2>Importar lista</h2>
       <p className="adm-help">
-        Cola um convite por linha. Linhas com dois nomes («Lóide e Taviano», «X &amp; Y») ou «(casados)» ficam com 2 lugares. Texto entre parênteses que não seja
+        Cola um convite por linha. Linhas com dois nomes («Ana e Paulo», «X &amp; Y») ou «(casados)» ficam com 2 lugares. Texto entre parênteses que não seja
         «casados» fica como nota. Nomes já existentes são ignorados.
       </p>
-      <textarea rows={10} value={text} onChange={(e) => (setText(e.target.value), setPreview(null))} placeholder={"Lóide e Taviano Muxito (casados)\nPascoal Pinto\n…"} />
+      <textarea rows={10} value={text} onChange={(e) => (setText(e.target.value), setPreview(null))} placeholder={"Ana e Paulo Mendes (casados)\nCarlos Mateus\n…"} />
       <div className="adm-tools">
         <button className="adm-btn adm-btn-ghost" disabled={!text.trim() || busy} onClick={() => run(true)}>
           Pré-visualizar
@@ -552,7 +552,7 @@ function GuestEditor({
         </header>
         <label>
           <span>Nome no convite</span>
-          <input value={f.displayName} onChange={(e) => set("displayName", e.target.value)} placeholder="ex.: Lóide e Taviano Muxito" autoFocus={!guest} />
+          <input value={f.displayName} onChange={(e) => set("displayName", e.target.value)} placeholder="ex.: Ana e Paulo Mendes" autoFocus={!guest} />
         </label>
         <div className="adm-grid2">
           <label>

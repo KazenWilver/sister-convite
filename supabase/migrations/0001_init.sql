@@ -48,7 +48,7 @@ create table if not exists public.event_settings (
 );
 
 insert into public.event_settings (id, dress_code_note)
-values (1, 'Tons de café: do baunilha ao espresso.')
+values (1, 'Da baunilha ao espresso, qualquer tom serve.')
 on conflict (id) do nothing;
 
 create table if not exists public.rsvp_log (

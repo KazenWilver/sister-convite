@@ -208,6 +208,10 @@
   margin-bottom: -1px;
   white-space: nowrap;
 }
+@media (max-width: 420px) {
+  .adm-tabs { gap: 0; }
+  .adm-tabs button { padding: 10px 9px; font-size: 14px; flex: 1 0 auto; }
+}
 .adm-tabs button.on {
   color: var(--ink);
   border-bottom-color: var(--caramel);

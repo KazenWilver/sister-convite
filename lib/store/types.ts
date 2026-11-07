@@ -53,7 +53,7 @@ export const DEFAULT_SETTINGS: Settings = {
   finalOpen: false,
   finalDeadline: null,
   dressCode: true,
-  dressCodeNote: "Tons de café: do baunilha ao espresso.",
+  dressCodeNote: "Da baunilha ao espresso, qualquer tom serve.",
 };
 
 export interface Store {
