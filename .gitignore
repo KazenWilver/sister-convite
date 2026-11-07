@@ -28,3 +28,6 @@ Thumbs.db
 
 # ferramentas locais
 .claude/
+
+# cache do detector de design
+.impeccable/hook.cache.json

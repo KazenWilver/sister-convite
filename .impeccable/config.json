@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "components/invite/invite.css"
+        ],
+        "createdAt": "2026-11-07T22:17:39.404Z",
+        "reason": "Claude triage: .cal-page/.cal-sheet border-top is the coloured binding strip of a tear-off desk calendar, an intentional illustration, not a card accent"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "components/invite/invite.css"
+        ],
+        "createdAt": "2026-11-07T22:17:39.655Z",
+        "reason": "Claude triage: .map-art-l::before border-right is a road/fold line inside the folded map illustration, not a card side-tab"
+      }
+    ]
+  }
+}
