@@ -22,3 +22,6 @@ documentos_detalhes/
 .DS_Store
 Thumbs.db
 *.log
+
+# base local de desenvolvimento
+.data/
