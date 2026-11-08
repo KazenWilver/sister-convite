@@ -164,6 +164,17 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
     if (msg) notify(msg);
   }
 
+  async function remove(g: AdminGuest) {
+    const answered = g.stage1 || g.stage2 ? " As respostas dele também desaparecem." : "";
+    if (!window.confirm(`Excluir ${g.displayName}?
+
+O link deixa de funcionar.${answered} Não dá para desfazer.`)) return;
+    await api(`/api/admin/guests/${g.id}`, "DELETE");
+    if (editing && editing !== "new" && editing.id === g.id) setEditing(null);
+    await load();
+    notify(`${g.displayName} foi excluído`);
+  }
+
   async function copy(g: AdminGuest) {
     if (!g.link) return;
     await navigator.clipboard.writeText(g.link);
@@ -307,6 +318,9 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
                     <a className="adm-btn adm-btn-ghost" href={g.link ? `${g.link}?preview=1` : "#"} target="_blank" rel="noopener noreferrer" title="Abre o convite sem contar como visita do convidado">
                       Ver
                     </a>
+                    <button className="adm-btn adm-btn-bad-ghost" onClick={() => remove(g)}>
+                      Excluir
+                    </button>
                   </div>
                 </li>
               ))}
@@ -433,7 +447,7 @@ function tourSteps(setTab: (t: Tab) => void, setFilter: (f: Filter) => void): To
     { target: '[data-tour="tabs"]', title: "As páginas do painel", text: "«Convidados» é a lista. «Actividade» mostra tudo o que acontece, pela ordem. «Mensagens» são os recados para a Juceline. «Entrada» serve no dia da festa, à porta.", before: list },
     { target: '[data-tour="tools"]', title: "Procurar e acrescentar", text: "Escreve um nome para o encontrar. Para convidar alguém novo, toca em «+ Convidado»: o convite e o link ficam prontos na hora.", before: list },
     { target: '[data-tour="filters"]', title: "Filtros", text: "Mostra só quem precisas: quem falta enviar, quem recebeu e ainda não abriu, quem disse sim, quem falta confirmar, quem recusou.", before: list },
-    { target: '[data-tour="row"] [data-tour-actions]', title: "Enviar o convite", text: "«WhatsApp» abre a conversa com a mensagem e o link já escritos: só tens de carregar em enviar, e o convite fica marcado como enviado. «Ver» mostra o convite tal como o convidado o vê.", before: list },
+    { target: '[data-tour="row"] [data-tour-actions]', title: "Enviar o convite", text: "«WhatsApp» abre a conversa com a mensagem e o link já escritos: só tens de carregar em enviar, e o convite fica marcado como enviado. «Ver» mostra o convite tal como o convidado o vê. «Excluir» apaga o convidado (pede confirmação antes).", before: list },
     { target: '[data-tour="row"] [data-tour-chips]', title: "O estado de cada convite", text: "As etiquetas dizem tudo: enviado, aberto (e quantas vezes), a resposta (1 · Sim / Não) e a confirmação final (2). Se aparecer «⚠ dispositivos», o link foi aberto em muitos telemóveis e pode ter sido reencaminhado.", before: list },
     { target: '[data-tour="row"] .adm-name', title: "Editar um convidado", text: "Toca no nome para mudar lugares, telefone ou grupo, registar uma resposta dada por telefone, ver quando abriu o convite, gerar um link novo ou apagar respostas de teste.", before: list },
     { target: '[data-tour="tab-activity"]', title: "Actividade", text: "Aqui vês, por ordem, quem abriu o convite, quem disse que vem, quem confirmou, quem desconfirmou e quem deixou mensagem. Quando chega algo novo, aparece um aviso em baixo.", before: list },
@@ -905,14 +919,14 @@ function GuestEditor({
                 className="adm-btn adm-btn-bad"
                 onClick={async () => {
                   await api(`/api/admin/guests/${guest.id}`, "DELETE");
-                  onSaved("Convidado removido");
+                  onSaved("Convidado excluído");
                 }}
               >
-                Confirmar: remover {guest.displayName}
+                Confirmar: excluir {guest.displayName}
               </button>
             ) : (
               <button className="adm-btn adm-btn-bad-ghost" onClick={() => setConfirmDelete(true)}>
-                Remover convidado
+                Excluir convidado
               </button>
             )}
           </div>
