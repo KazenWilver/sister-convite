@@ -10,15 +10,16 @@ export const alt = "Convite para a licenciatura da Juceline Vieira Dias";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const font = (f: string) => fs.readFile(path.join(process.cwd(), "node_modules", f));
+// As letras vivem em assets/fonts (incluídas no servidor pelo next.config); node_modules não vai para a Vercel.
+const font = (f: string) => fs.readFile(path.join(process.cwd(), "assets", "fonts", f));
 
 export default async function Image({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const g = await findGuestByToken(token);
   const name = g && g.status === "active" ? g.displayName : null;
   const [fr600, fr600i] = await Promise.all([
-    font("@fontsource/fraunces/files/fraunces-latin-700-normal.woff"),
-    font("@fontsource/fraunces/files/fraunces-latin-400-italic.woff"),
+    font("fraunces-latin-700-normal.woff"),
+    font("fraunces-latin-400-italic.woff"),
   ]);
 
   return new ImageResponse(

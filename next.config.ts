@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   // A pasta-mãe tem outro package-lock.json; a raiz do projecto é esta.
   turbopack: { root: import.meta.dirname },
+  // A imagem da pré-visualização lê estas letras do disco: têm de ir com o servidor.
+  outputFileTracingIncludes: {
+    "/c/[token]/opengraph-image": ["./assets/fonts/*.woff"],
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
