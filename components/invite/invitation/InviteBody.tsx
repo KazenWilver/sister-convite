@@ -369,8 +369,9 @@ Localização: ${EVENT.venueMaps}`,
           os === "android" ? { k: "phone", label: "Mapa do telemóvel", href: links.phone } : { k: "apple", label: "Apple Maps", href: links.apple },
         ]
     : [];
-  const pin = event.lat != null && event.lng != null ? ` · https://maps.google.com/?q=${event.lat},${event.lng}` : "";
-  const copyText = event.address ? `${venue}, ${event.address}` : `${venue}, ${EVENT.city}${pin}`;
+  // Nome do local numa linha e o link do mapa noutra: colado no WhatsApp, o link fica clicável e mostra o mapa.
+  const mapLink = event.lat != null && event.lng != null ? `https://maps.google.com/?q=${event.lat},${event.lng}` : "";
+  const copyText = [`${venue}, ${event.address || EVENT.city}`, mapLink].filter(Boolean).join("\n");
 
   return (
     <main className="invite" ref={root} aria-hidden={!active}>
