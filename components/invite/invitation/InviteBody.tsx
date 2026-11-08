@@ -410,8 +410,17 @@ Localização: ${EVENT.venueMaps}`,
             </text>
           </svg>
         </div>
+        {/* No telemóvel o dedo sobe: mostramos o gesto (ponto a subir), não uma seta para baixo */}
         <p className="scroll-cue">
-          Desliza <span aria-hidden="true">↓</span>
+          <span className="cue-touch">
+            <span className="cue-swipe" aria-hidden="true">
+              <i />
+            </span>
+            Desliza para cima
+          </span>
+          <span className="cue-mouse">
+            Continua <span className="cue-arrow" aria-hidden="true">↓</span>
+          </span>
         </p>
         <Wave fill="var(--blue-600)" />
       </section>

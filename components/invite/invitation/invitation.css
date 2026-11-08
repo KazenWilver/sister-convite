@@ -341,7 +341,45 @@
   text-transform: uppercase;
   color: var(--blue-100);
 }
-.scroll-cue span {
+.cue-touch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.cue-mouse {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cue-touch { display: none; }
+  .cue-mouse { display: inline; }
+}
+/* gesto: um ponto que sobe dentro de uma calha, como o dedo no ecrã */
+.cue-swipe {
+  position: relative;
+  width: 14px;
+  height: 30px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  opacity: 0.9;
+}
+.cue-swipe i {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: cue-up 1.6s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+@keyframes cue-up {
+  0% { translate: 0 0; opacity: 0; }
+  15% { opacity: 1; }
+  70% { translate: 0 -16px; opacity: 1; }
+  100% { translate: 0 -16px; opacity: 0; }
+}
+.cue-arrow {
   display: inline-block;
   animation: nudge 1.8s ease-in-out infinite;
 }
@@ -1757,7 +1795,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero-seal-ring,
-  .scroll-cue span,
+  .cue-swipe i,
+  .cue-arrow,
   .cta-nudge,
   .cta-nudge svg,
   .cta-ring,
