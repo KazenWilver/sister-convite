@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AdminGuest } from "@/lib/admin";
 import type { LogEntry, Settings } from "@/lib/store/types";
+import { InstallAdmin, isStandalone } from "./InstallAdmin";
 import { Tour, tourSeen, type TourStep } from "./Tour";
 import "./admin.css";
 
@@ -204,6 +205,7 @@ O link deixa de funcionar.${answered} Não dá para desfazer.`)) return;
           <p className="adm-countdown">{countdown()}</p>
         </div>
         <div className="adm-head-actions">
+          <InstallAdmin onToast={notify} />
           <button className="adm-btn adm-btn-ghost" onClick={() => setTour(true)} data-tour="help">
             Tutorial
           </button>
@@ -457,6 +459,9 @@ function tourSteps(setTab: (t: Tab) => void, setFilter: (f: Filter) => void): To
     { target: '[data-tour="tab-activity"]', title: "Actividade", text: "Aqui vês, por ordem, quem abriu o convite, quem disse que vem, quem confirmou, quem desconfirmou e quem deixou mensagem. Quando chega algo novo, aparece um aviso em baixo.", before: list },
     { target: '[data-tour="tab-door"]', title: "No dia da festa: Entrada", text: "À porta, escreve o nome de quem chega e carrega em «Registar entrada». Vês logo se a pessoa confirmou e, se o mesmo convite entrar duas vezes, o painel avisa.", before: list },
     { target: '[data-tour="tab-settings"]', title: "Definições", text: "Hora, local, mapa e dress code. Mais perto da data, liga «Pedir a confirmação final» e usa o botão «Lembrar» em cada convidado.", before: list },
+    ...(isStandalone()
+      ? []
+      : [{ target: '[data-tour="install"]', title: "O painel no telemóvel", text: "Toca em «Instalar no telemóvel» e o painel fica no ecrã principal com um ícone azul. Assim abres tudo num toque, sem ir ao browser nem escrever o endereço.", before: list }]),
     { target: '[data-tour="help"]', title: "Pronto!", text: "Já sabes o essencial. Se te esqueceres de alguma coisa, toca em «Tutorial» e vemos tudo outra vez.", before: list },
   ];
 }

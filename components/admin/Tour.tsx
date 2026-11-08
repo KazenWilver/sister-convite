@@ -1,7 +1,7 @@
 "use client";
 // Tutorial guiado do painel: balões que apontam para cada opção, um passo de cada vez.
 // Aparece sozinho na primeira entrada; depois pode ser revisto no botão "Tutorial".
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export type TourStep = { target?: string; title: string; text: string; before?: () => void };
 
@@ -35,13 +35,30 @@ export function Tour({ steps, onClose }: { steps: TourStep[]; onClose: () => voi
   useLayoutEffect(() => {
     step.before?.();
     // espera que a página mude (separadores) antes de medir
+    let t2 = 0;
     const t = window.setTimeout(() => {
       const el = step.target ? document.querySelector<HTMLElement>(step.target) : null;
       el?.scrollIntoView({ block: "center", behavior: "smooth" });
-      window.setTimeout(measure, 380);
+      t2 = window.setTimeout(() => {
+        // se o deslizar suave não aconteceu (alguns telemóveis), salta de uma vez
+        const r = el?.getBoundingClientRect();
+        if (el && r && (r.bottom < 0 || r.top > window.innerHeight)) el.scrollIntoView({ block: "center" });
+        measure();
+      }, 420);
     }, 60);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+      window.clearTimeout(t2);
+    };
   }, [step, measure]);
+
+  // altura real do balão, para nunca o pôr fora do ecrã (telemóvel deitado)
+  const tipRef = useRef<HTMLDivElement>(null);
+  const [tipH, setTipH] = useState(260);
+  useLayoutEffect(() => {
+    const h = tipRef.current?.offsetHeight;
+    if (h && Math.abs(h - tipH) > 2) setTipH(h);
+  });
 
   useEffect(() => {
     const on = () => measure();
@@ -64,13 +81,24 @@ export function Tour({ steps, onClose }: { steps: TourStep[]; onClose: () => voi
   const vw = typeof window !== "undefined" ? window.innerWidth : 400;
   const vh = typeof window !== "undefined" ? window.innerHeight : 800;
   const W = Math.min(340, vw - 32);
-  let pos: React.CSSProperties = { left: (vw - W) / 2, top: vh / 2 - 120, width: W };
+  const gap = pad + 14;
+  const edge = 12;
+  let pos: React.CSSProperties = { left: (vw - W) / 2, top: Math.max(edge, (vh - tipH) / 2), width: W };
   let arrow: "up" | "down" | null = null;
   if (rect) {
     const left = Math.max(16, Math.min(vw - W - 16, rect.left + rect.width / 2 - W / 2));
-    const below = rect.bottom + 16 + 200 < vh || rect.top < vh / 2;
-    pos = below ? { left, top: rect.bottom + pad + 14, width: W } : { left, bottom: vh - rect.top + pad + 14, width: W };
-    arrow = below ? "up" : "down";
+    const roomBelow = vh - rect.bottom - gap - edge;
+    const roomAbove = rect.top - gap - edge;
+    if (roomBelow >= tipH || (roomBelow >= roomAbove && roomAbove < tipH)) {
+      // por baixo do alvo; se não couber, encosta ao fundo do ecrã (por cima do alvo)
+      const top = Math.max(edge, Math.min(rect.bottom + gap, vh - tipH - edge));
+      pos = { left, top, width: W };
+      arrow = top === rect.bottom + gap ? "up" : null;
+    } else {
+      const top = Math.max(edge, rect.top - gap - tipH);
+      pos = { left, top, width: W };
+      arrow = top === rect.top - gap - tipH ? "down" : null;
+    }
   }
   const arrowX = rect ? Math.max(20, Math.min(W - 20, rect.left + rect.width / 2 - (pos.left as number))) : 0;
   const last = i === steps.length - 1;
@@ -82,7 +110,7 @@ export function Tour({ steps, onClose }: { steps: TourStep[]; onClose: () => voi
       ) : (
         <div className="tour-dim" />
       )}
-      <div className={`tour-tip ${arrow ?? "center"}`} style={pos} key={i}>
+      <div ref={tipRef} className={`tour-tip ${arrow ?? "center"}`} style={pos} key={i}>
         {arrow && <span className="tour-arrow" style={{ left: arrowX }} aria-hidden="true" />}
         <p className="tour-count">
           {i + 1} de {steps.length}
