@@ -40,6 +40,9 @@ export function LoginForm() {
           {busy ? "A entrar…" : "Entrar"}
         </button>
       </form>
+      <p className="adm-credit">
+        Feito por <span>Willfredy Vieira Dias</span>
+      </p>
     </main>
   );
 }

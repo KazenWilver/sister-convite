@@ -1243,3 +1243,21 @@
     display: none;
   }
 }
+
+/* Assinatura de quem fez o painel */
+.adm-credit {
+  margin: 36px auto 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted, rgba(10, 31, 68, 0.5));
+}
+.adm-credit span {
+  color: var(--navy-800, #12336b);
+  font-weight: 800;
+}
+.adm-login .adm-credit {
+  margin-top: 22px;
+}

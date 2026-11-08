@@ -349,6 +349,10 @@ O link deixa de funcionar.${answered} Não dá para desfazer.`)) return;
         />
       )}
 
+      <footer className="adm-credit">
+        Feito por <span>Willfredy Vieira Dias</span>
+      </footer>
+
       {tour && <Tour steps={tourSteps(setTab, setFilter)} onClose={() => (setTour(false), setTab("guests"))} />}
 
       {toast && (

@@ -1769,3 +1769,22 @@
     opacity: 1;
   }
 }
+
+/* Assinatura de quem fez o convite: discreta, no fim de tudo */
+.foot p {
+  margin: 0;
+}
+.foot .credit {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+.foot .credit span {
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 800;
+}

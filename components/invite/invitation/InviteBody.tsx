@@ -652,7 +652,12 @@ Localização: ${EVENT.venueMaps}`,
         <p className="sign">
           Com carinho, <span className="sign-name">{EVENT.firstName}</span> e família
         </p>
-        <footer className="foot">Convite pessoal para {guest.name}. Por favor, não partilhes este link.</footer>
+        <footer className="foot">
+          <p>Convite pessoal para {guest.name}. Por favor, não partilhes este link.</p>
+          <p className="credit">
+            Feito por <span>Willfredy Vieira Dias</span>
+          </p>
+        </footer>
       </section>
     </main>
   );
