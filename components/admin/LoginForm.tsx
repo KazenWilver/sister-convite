@@ -33,7 +33,7 @@ export function LoginForm() {
         <p>Lista de convidados da Juceline</p>
         <label>
           <span>PIN</span>
-          <input type="password" inputMode="numeric" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required autoFocus />
+          <input id="admin-pin" name="pin" type="password" inputMode="numeric" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required autoFocus />
         </label>
         {error && <p className="adm-error" role="alert">{error}</p>}
         <button className="adm-btn adm-btn-primary" disabled={busy}>
