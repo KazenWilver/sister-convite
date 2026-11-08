@@ -1257,6 +1257,7 @@
 .adm-credit span {
   color: var(--navy-800, #12336b);
   font-weight: 800;
+  white-space: nowrap;
 }
 .adm-login .adm-credit {
   margin-top: 22px;
