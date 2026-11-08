@@ -73,12 +73,15 @@ export function DateReveal({ active }: { active: boolean }) {
           },
         },
       });
-      tl.from(q(".d-day"), { x: () => -vw() * 1.2, rotate: -28, scale: 1.7, duration: 0.45 }, 0)
-        .from(q(".d-month"), { x: () => vw() * 1.2, rotate: 24, scale: 1.7, duration: 0.45 }, 0.1)
-        .from(q(".d-year"), { x: () => -vw() * 0.7, y: () => vh() * 0.7, rotate: -16, duration: 0.45 }, 0.22)
-        .from(q(".d-mname"), { x: () => vw() * 0.8, y: () => -vh() * 0.5, rotate: 12, duration: 0.42 }, 0.28)
-        .from(split!.chars, { y: () => -vh() * 0.7, rotate: () => gsap.utils.random(-70, 70), opacity: 0, stagger: 0.03, duration: 0.35 }, 0.32)
-        .from(q(".d-kicker"), { x: () => -vw() * 0.4, opacity: 0, duration: 0.3 }, 0)
+      // fromTo com o fim explícito: com from() o GSAP, ao recalcular (rodar o telemóvel, mudar o tamanho),
+      // podia guardar como "fim" o estado escondido e deixar letras invisíveis para sempre (o S de Sábado)
+      const home = { x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 };
+      tl.fromTo(q(".d-day"), { x: () => -vw() * 1.2, rotate: -28, scale: 1.7 }, { ...home, duration: 0.45 }, 0)
+        .fromTo(q(".d-month"), { x: () => vw() * 1.2, rotate: 24, scale: 1.7 }, { ...home, duration: 0.45 }, 0.1)
+        .fromTo(q(".d-year"), { x: () => -vw() * 0.7, y: () => vh() * 0.7, rotate: -16 }, { ...home, duration: 0.45 }, 0.22)
+        .fromTo(q(".d-mname"), { x: () => vw() * 0.8, y: () => -vh() * 0.5, rotate: 12 }, { ...home, duration: 0.42 }, 0.28)
+        .fromTo(split!.chars, { y: () => -vh() * 0.7, rotate: () => gsap.utils.random(-70, 70), opacity: 0 }, { ...home, stagger: 0.03, duration: 0.35 }, 0.32)
+        .fromTo(q(".d-kicker"), { x: () => -vw() * 0.4, opacity: 0 }, { ...home, duration: 0.3 }, 0)
         .to({}, { duration: 0.25 }); // pausa final: a data fica parada e legível
     }, el);
     return () => {

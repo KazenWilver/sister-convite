@@ -9,7 +9,7 @@ import { UniqueSeal } from "../shared/UniqueSeal";
 import { EVENT } from "@/lib/config";
 import type { PublicEvent, PublicGuest } from "@/lib/guests";
 import * as sfx from "@/lib/sound";
-import { CharacterSvg, createPuppet, IDLE, runPose } from "../shared/Character";
+import { CharacterSvg, createPuppet, IDLE } from "../shared/Character";
 import { burst, Confetti } from "../shared/Confetti";
 import { blobPath, liveRadii } from "../shared/liquid";
 import { DateReveal } from "./DateReveal";
@@ -204,39 +204,6 @@ Localização: ${EVENT.venueMaps}`,
       gsap.to(q(".hero-card"), { y: -40, rotate: -8, ease: "none", scrollTrigger: { trigger: heroEl, start: "top top", end: "bottom top", scrub: true } });
       gsap.to(q(".hero-seal"), { y: 120, rotate: 140, ease: "none", scrollTrigger: { trigger: heroEl, start: "top top", end: "bottom top", scrub: true } });
 
-      // A conquista: travelling horizontal com a mini-Juceline a caminhar
-      const track = q(".achieve-track")[0] as HTMLElement;
-      const walker = q(".walker [data-root]")[0] as unknown as SVGGElement | undefined;
-      const puppet = walker ? createPuppet(walker) : null;
-      puppet?.set(IDLE);
-      const walkerEl = q(".walker")[0] as HTMLElement | undefined;
-      const dist = () => track.scrollWidth - window.innerWidth;
-      // depois do último painel, ela continua a andar e sai do ecrã pela direita
-      const walkOut = () => window.innerWidth * 0.5 + 120;
-      const STRIDE = 150; // px de scroll por passada completa
-      const trip = { p: 0 };
-      gsap.to(trip, {
-        p: 1,
-        ease: "none",
-        onUpdate: () => {
-          const px = trip.p * (dist() + walkOut());
-          gsap.set(track, { x: -Math.min(px, dist()) });
-          if (walkerEl) gsap.set(walkerEl, { x: Math.max(0, px - dist()) });
-          puppet?.set(runPose((px / STRIDE) * Math.PI * 2, 0.55));
-        },
-        scrollTrigger: {
-          trigger: q(".achieve")[0],
-          start: "top top",
-          end: () => `+=${dist() + walkOut()}`,
-          pin: true,
-          scrub: 0.6,
-          invalidateOnRefresh: true,
-        },
-      });
-      q(".achieve-word").forEach((el, i) => {
-        gsap.fromTo(el, { xPercent: i % 2 ? -10 : 22, rotate: i % 2 ? 3 : -3 }, { xPercent: i % 2 ? 12 : -10, rotate: 0, ease: "none", scrollTrigger: { trigger: q(".achieve")[0], start: "top top", end: () => `+=${dist()}`, scrub: true } });
-      });
-
       // Entradas e saídas com o scroll, em várias direcções
       q("[data-from]").forEach((el) => {
         const f = FROM[(el as HTMLElement).dataset.from ?? "up"] ?? FROM.up;
@@ -398,37 +365,11 @@ Localização: ${EVENT.venueMaps}`,
             Continua <span className="cue-arrow" aria-hidden="true">↓</span>
           </span>
         </p>
-        <Wave fill="var(--blue-600)" />
+        <Wave fill="var(--navy-900)" />
       </section>
 
-      {/* 2 · A conquista (travelling horizontal) */}
-      <section className="achieve">
-        <div className="achieve-track">
-          <div className="achieve-panel">
-            <p className="kicker">Licenciada em</p>
-            <p className="achieve-word">Contabilidade</p>
-          </div>
-          <div className="achieve-panel">
-            <p className="achieve-word amp">&amp; Finanças</p>
-            <p className="achieve-note">Muitos números, balanços e dedicação — e um diploma no fim.</p>
-          </div>
-          <div className="achieve-panel">
-            <p className="kicker">Pelo</p>
-            <p className="achieve-inst">{EVENT.institution}</p>
-            <p className="achieve-note">
-              {EVENT.institutionLong}
-              <br />
-              {EVENT.city}, Angola
-            </p>
-          </div>
-        </div>
-        <div className="ledger-line" aria-hidden="true" />
-        <CharacterSvg className="walker" />
-      </section>
-
-      {/* 3 · A data (revelação com o scroll) */}
+      {/* 2 · A data (revelação com o scroll) */}
       <section className="when">
-        <Wave fill="var(--blue-600)" flip />
         <DateReveal active={active} />
         <div className="when-after">
           {!past && <Countdown target={target} />}
@@ -444,7 +385,7 @@ Localização: ${EVENT.venueMaps}`,
         <Wave fill="var(--white)" />
       </section>
 
-      {/* 4 · Dress code */}
+      {/* 3 · Dress code */}
       {event.dressCode && (
         <section className="dress">
           <span className="shape shape-c" data-speed="1.2" aria-hidden="true" />
@@ -491,7 +432,7 @@ Localização: ${EVENT.venueMaps}`,
         </section>
       )}
 
-      {/* 5 · Local */}
+      {/* 4 · Local */}
       <section className="where">
         <span className="shape shape-d" data-speed="-1" aria-hidden="true" />
         <p className="kicker" data-from="left">
@@ -553,7 +494,7 @@ Localização: ${EVENT.venueMaps}`,
         <Wave fill="var(--blue-50)" />
       </section>
 
-      {/* 6 · RSVP */}
+      {/* 5 · RSVP */}
       <section className="reply">
         <span className="shape shape-e" data-speed="0.9" aria-hidden="true" />
         <p className="kicker" data-from="right">
@@ -568,7 +509,7 @@ Localização: ${EVENT.venueMaps}`,
         <Wave fill="var(--navy-950)" />
       </section>
 
-      {/* 7 · Final */}
+      {/* 6 · Final */}
       <section
         className="final"
         onPointerDown={(e) => (swipe.current = e.clientY)}
