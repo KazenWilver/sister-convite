@@ -7,8 +7,8 @@ import { store, type Guest } from "@/lib/store";
 export async function GET() {
   const denied = await requireAdmin();
   if (denied) return denied;
-  const [guests, settings] = await Promise.all([store.listGuests(), store.getSettings()]);
-  return NextResponse.json({ guests: guests.map(toAdmin), stats: computeStats(guests, settings), settings });
+  const [guests, settings, log] = await Promise.all([store.listGuests(), store.getSettings(), store.listLog(300)]);
+  return NextResponse.json({ guests: guests.map(toAdmin), stats: computeStats(guests, settings), settings, log });
 }
 
 /** Criar um convidado ({guest}) ou importar uma lista ({importText, dryRun}). */

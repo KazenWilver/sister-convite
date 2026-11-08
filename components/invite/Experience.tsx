@@ -2,10 +2,25 @@
 import { useCallback, useEffect, useState } from "react";
 import type { PublicEvent, PublicGuest } from "@/lib/guests";
 import { isSoundEnabled, setSoundEnabled, unlockAudio } from "@/lib/sound";
-import { IntroScene } from "./IntroScene";
-import { InviteBody } from "./InviteBody";
+import { IntroShell } from "./invitation/IntroShell";
+import { InviteBody } from "./invitation/InviteBody";
 
 const SEEN = "jvd:intro-visto";
+const DEVICE = "jvd:disp";
+
+/** Número aleatório guardado no browser, para o admin saber em quantos dispositivos o convite foi aberto. */
+function deviceId(): string | undefined {
+  try {
+    let d = localStorage.getItem(DEVICE);
+    if (!d) {
+      d = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, "0")).join("");
+      localStorage.setItem(DEVICE, d);
+    }
+    return d;
+  } catch {
+    return undefined;
+  }
+}
 
 export function Experience({ token, guest, event }: { token: string; guest: PublicGuest; event: PublicEvent }) {
   const [mode, setMode] = useState<"loading" | "intro" | "invite">("loading");
@@ -14,6 +29,10 @@ export function Experience({ token, guest, event }: { token: string; guest: Publ
 
   useEffect(() => {
     let seen = false;
+    // ?intro=1 força a abertura (útil para pré-visualizar)
+    const qs = new URLSearchParams(window.location.search);
+    const forced = qs.get("intro") === "1";
+    const preview = qs.get("preview") === "1"; // "Ver" no admin: não conta como visita
     try {
       seen = localStorage.getItem(SEEN) === "1";
       const s = localStorage.getItem("jvd:som");
@@ -22,10 +41,11 @@ export function Experience({ token, guest, event }: { token: string; guest: Publ
         setSoundEnabled(false);
       }
     } catch {}
-    setMode(seen ? "invite" : "intro");
+    // Quem já respondeu (sim ou não) vai directo ao convite: nada de abertura nem de laço outra vez.
+    setMode(!forced && (guest.answered || seen) ? "invite" : "intro");
     // regista a abertura (só aqui, no browser — a pré-visualização do WhatsApp não conta)
-    fetch("/api/open", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }), keepalive: true }).catch(() => {});
-  }, [token]);
+    if (!preview) fetch("/api/open", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, device: deviceId() }), keepalive: true }).catch(() => {});
+  }, [token, guest.answered]);
 
   useEffect(() => {
     document.documentElement.style.overflow = mode === "invite" ? "" : "hidden";
@@ -55,7 +75,7 @@ export function Experience({ token, guest, event }: { token: string; guest: Publ
   return (
     <>
       <InviteBody token={token} guest={guest} event={event} active={mode === "invite"} />
-      {mode === "intro" && <IntroScene key={introKey} guestName={guest.name} plural={guest.plural} onDone={done} />}
+      {mode === "intro" && <IntroShell key={introKey} guestName={guest.name} plural={guest.plural} onDone={done} />}
       {mode === "loading" && <div className="intro-cover" />}
       <div className="topbar">
         <button className="topbar-btn" onClick={toggleSound} aria-label={sound ? "Desligar som" : "Ligar som"} aria-pressed={sound}>

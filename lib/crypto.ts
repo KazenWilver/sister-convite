@@ -46,6 +46,16 @@ export function decryptToken(blob: string): string | null {
   }
 }
 
+/** Semente do selo único (32 bits), também derivada do id. */
+export function sealSeed(guestId: string): number {
+  return createHmac("sha256", requireEnv("SESSION_SECRET")).update(`selo:${guestId}`).digest().readUInt32BE(0);
+}
+
+/** Identificador anónimo de um dispositivo (o browser guarda um número aleatório; aqui só fica o hash curto). */
+export function deviceTag(raw: string): string {
+  return createHash("sha256").update(`disp:${raw}`).digest("hex").slice(0, 10);
+}
+
 export function verifyPassword(password: string): boolean {
   const stored = process.env.ADMIN_PASSWORD_HASH;
   if (!stored) return false;

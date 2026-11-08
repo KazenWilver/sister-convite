@@ -19,6 +19,9 @@ export interface Guest {
   firstOpenedAt: string | null;
   lastOpenedAt: string | null;
   openCount: number;
+  devices: string[]; // hashes curtos dos dispositivos que abriram o convite (máx. 12)
+  checkedInAt: string | null; // entrada registada à porta
+  checkedInPeople: number;
   stage1: Stage1;
   stage1At: string | null;
   stage2: Stage2;
@@ -56,6 +59,13 @@ export const DEFAULT_SETTINGS: Settings = {
   dressCodeNote: "Da baunilha ao espresso, qualquer tom serve.",
 };
 
+export interface LogEntry {
+  guestId: string;
+  action: string;
+  value: string | null;
+  at: string;
+}
+
 export interface Store {
   listGuests(): Promise<Guest[]>;
   getGuest(id: string): Promise<Guest | null>;
@@ -66,4 +76,5 @@ export interface Store {
   getSettings(): Promise<Settings>;
   updateSettings(patch: Partial<Settings>): Promise<Settings>;
   log(guestId: string, action: string, value: string | null): Promise<void>;
+  listLog(limit: number): Promise<LogEntry[]>;
 }

@@ -32,6 +32,9 @@ const guestMap: Record<keyof Guest, string> = {
   firstOpenedAt: "first_opened_at",
   lastOpenedAt: "last_opened_at",
   openCount: "open_count",
+  devices: "devices",
+  checkedInAt: "checked_in_at",
+  checkedInPeople: "checked_in_people",
   stage1: "stage1",
   stage1At: "stage1_at",
   stage2: "stage2",
@@ -65,6 +68,8 @@ function toRow<T extends object>(obj: Partial<T>, map: Record<string, string>) {
 function fromRow<T>(row: Record<string, unknown>, map: Record<string, string>): T {
   const obj: Record<string, unknown> = {};
   for (const [k, col] of Object.entries(map)) obj[k] = row[col] ?? null;
+  if ("devices" in obj && !Array.isArray(obj.devices)) obj.devices = [];
+  if ("checkedInPeople" in obj && obj.checkedInPeople == null) obj.checkedInPeople = 0;
   return obj as T;
 }
 
@@ -117,6 +122,10 @@ export const supabaseStore: Store = {
         .single(),
     );
     return { ...DEFAULT_SETTINGS, ...fromRow<Settings>(row, settingsMap) };
+  },
+  async listLog(limit) {
+    const rows = check(await db().from("rsvp_log").select("guest_id, action, value, at").order("at", { ascending: false }).limit(limit));
+    return (rows ?? []).map((r) => ({ guestId: r.guest_id as string, action: r.action as string, value: (r.value as string | null) ?? null, at: r.at as string }));
   },
   async log(guestId, action, value) {
     check(await db().from("rsvp_log").insert({ guest_id: guestId, action, value }));

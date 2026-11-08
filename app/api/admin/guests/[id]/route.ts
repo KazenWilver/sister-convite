@@ -28,12 +28,14 @@ export async function PATCH(req: Request, { params }: Ctx) {
     }
     case "markSent":
       patch = { sentAt: g.sentAt ?? now };
+      if (!g.sentAt) await store.log(g.id, "sent", null);
       break;
     case "unmarkSent":
       patch = { sentAt: null };
       break;
     case "resetResponses":
-      patch = { stage1: null, stage1At: null, stage2: null, stage2At: null, attending: 0 };
+      // usado depois dos testes: o convite volta a ficar como novo
+      patch = { stage1: null, stage1At: null, stage2: null, stage2At: null, attending: 0, message: null, messageAt: null, checkedInAt: null, checkedInPeople: 0, devices: [] };
       break;
     case "replaceWith": {
       // Libertar o lugar deste convidado e activar outro (normalmente da lista de espera).

@@ -1,17 +1,30 @@
 :root {
-  /* Paleta (DressCode) */
-  --vanilla: #d7bda6;
-  --caramel: #ab7743;
-  --almond: #b7957f;
-  --coffee: #6d3914;
-  --mocca: #84593d;
-  --espresso: #4c2b08;
-  /* Apoios derivados */
-  --cream: #f4e9dc;
-  --paper: #ecdcc9;
-  --ink: #2a1705;
-  --gold: #c9a35a;
-  --gold-hi: #e6c98a;
+  --font-hand: var(--font-body);
+  /* Paleta: azuis (do azul-noite ao azul-claro), branco e preto */
+  --navy-950: #050d1f;
+  --navy-900: #0a1f44;
+  --navy-800: #12336b;
+  --blue-700: #1b4fa0;
+  --blue-600: #1f5fbf;
+  --blue-400: #4f8fe6;
+  --blue-300: #8dbcf2;
+  --blue-100: #d6e8fb;
+  --blue-50: #eef5fd;
+  --white: #ffffff;
+  --black: #08090c;
+
+  /* Nomes antigos, agora mapeados para a paleta azul (admin e páginas neutras) */
+  --vanilla: var(--blue-100);
+  --caramel: var(--blue-600);
+  --almond: var(--blue-300);
+  --coffee: var(--navy-800);
+  --mocca: var(--blue-700);
+  --espresso: var(--navy-900);
+  --cream: #f4f8fe;
+  --paper: var(--blue-50);
+  --ink: #0b1220;
+  --gold: var(--blue-300);
+  --gold-hi: var(--blue-100);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);

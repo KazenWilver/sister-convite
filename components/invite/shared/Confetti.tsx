@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 
 // Confettis em canvas (um só, fixo, por cima de tudo). Chamar burst(x, y) em coordenadas do ecrã.
 type P = { x: number; y: number; vx: number; vy: number; r: number; vr: number; s: number; c: string; k: number; life: number };
-const COLORS = ["#c9a35a", "#e6c98a", "#ab7743", "#d7bda6", "#f4e9dc", "#6d3914", "#84593d"];
+const COLORS = ["#ffffff", "#d6e8fb", "#8dbcf2", "#4f8fe6", "#1f5fbf", "#12336b", "#0b1220"];
 let emit: ((x: number, y: number, n?: number, spread?: number) => void) | null = null;
 
 export function burst(x: number, y: number, n = 90, spread = 1) {

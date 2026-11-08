@@ -3,8 +3,8 @@ import gsap from "gsap";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as sfx from "@/lib/sound";
 import { Seal } from "@/components/Seal";
-import { Canudo } from "./Canudo";
-import { Character, createPuppet, IDLE, JUMP, mixPose, runPose } from "./Character";
+import { Canudo } from "../../shared/Canudo";
+import { Character, createPuppet, IDLE, JUMP, mixPose, runPose } from "../../shared/Character";
 import "./intro.css";
 
 // ── Mundo (unidades SVG) ──────────────────────────────────────────────
@@ -351,7 +351,7 @@ export function IntroScene({ guestName, plural, onDone }: { guestName: string; p
 
     function jump() {
       st.jumped = true;
-      sfx.whoosh(0.5, 0.28);
+      sfx.whoosh(0.28);
       const j = gsap.timeline();
       j.to(st, { jump: 1, duration: 0.14, ease: "power2.out" }, 0)
         .to(st, { charX: st.charX + 300, duration: 0.56, ease: "none" }, 0)
@@ -403,11 +403,11 @@ export function IntroScene({ guestName, plural, onDone }: { guestName: string; p
       const glint = c("glint");
       wobble = gsap
         .timeline({ repeat: -1, repeatDelay: 1.6, delay: 0.6 })
-        .call(() => sfx.tick(900, 0.08))
+        .call(() => sfx.tick(0.12))
         .to(st, { wobY: -9, duration: 0.12, ease: "power2.out" })
         .to(st, { wob: -7, duration: 0.07 }, "<")
         .to(st, { wob: 6, duration: 0.09 })
-        .call(() => sfx.tick(1100, 0.07))
+        .call(() => sfx.tick(0.1))
         .to(st, { wob: -4, duration: 0.08 })
         .to(st, { wob: 2, duration: 0.08 })
         .to(st, { wob: 0, wobY: 0, duration: 0.14, ease: "power2.in" })
@@ -477,7 +477,7 @@ export function IntroScene({ guestName, plural, onDone }: { guestName: string; p
 
     // ── sequência principal ──
     tl.fromTo(svg.querySelectorAll('[data-fade="title"] text'), { opacity: 0, y: 14 }, { opacity: (i: number) => (i ? 0.75 : 1), y: 0, stagger: 0.35, duration: 0.9, ease: "power2.out" }, 0.35)
-      .call(() => sfx.whoosh(1.6, 0.22), [], 1.75)
+      .call(() => sfx.whoosh(0.22), [], 1.75)
       .to(st, { cy: CY0, duration: 2.8, ease: "power2.inOut" }, 1.6)
       .to(svg.querySelectorAll('[data-fade="stars"], [data-fade="title"]'), { opacity: 0, duration: 1.4, ease: "power1.in" }, 2.1)
       .call(

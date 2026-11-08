@@ -1,0 +1,231 @@
+/* Convite fechado com fita e laço ----------------------------------- */
+.ci {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  overflow: hidden;
+}
+.ci-liquid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ci-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 22px;
+  padding: 24px;
+}
+.ci-card {
+  /* mantém sempre a proporção de cartão ao alto, também com o telemóvel deitado */
+  --w: min(78vw, 360px, calc(72svh / 1.42));
+  position: relative;
+  width: var(--w);
+  height: calc(var(--w) * 1.42);
+  container-type: inline-size;
+  perspective: 1400px;
+  will-change: transform;
+}
+/* interior (aparece quando as portas abrem) */
+.ci-inside {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  border-radius: 6px;
+  background: radial-gradient(120% 80% at 30% 20%, var(--blue-600), var(--navy-800) 55%, var(--navy-950));
+  color: var(--white);
+  box-shadow: 0 40px 70px -30px rgba(0, 0, 0, 0.7);
+}
+.ci-in-kicker {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--blue-100);
+}
+.ci-in-name {
+  margin: 0;
+  font-family: var(--font-script), cursive;
+  font-size: clamp(40px, 23cqw, 84px);
+  line-height: 1.1;
+}
+.ci-in-date {
+  margin: 0;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  color: var(--blue-100);
+}
+/* duas portas */
+.ci-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  transform-style: preserve-3d;
+}
+.ci-l {
+  left: 0;
+  transform-origin: 0 50%;
+}
+.ci-r {
+  right: 0;
+  transform-origin: 100% 50%;
+}
+.ci-face,
+.ci-back {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.ci-face {
+  background: var(--white);
+  box-shadow: 0 30px 60px -28px rgba(5, 13, 31, 0.75);
+}
+.ci-l .ci-face {
+  border-radius: 6px 0 0 6px;
+  box-shadow: inset -1px 0 0 rgba(10, 31, 68, 0.12), 0 30px 60px -28px rgba(5, 13, 31, 0.75);
+}
+.ci-r .ci-face {
+  border-radius: 0 6px 6px 0;
+}
+.ci-back {
+  transform: rotateY(180deg);
+  background: repeating-linear-gradient(135deg, var(--blue-100) 0 10px, var(--blue-50) 10px 20px);
+}
+.ci-l .ci-back {
+  border-radius: 0 6px 6px 0;
+}
+.ci-r .ci-back {
+  border-radius: 6px 0 0 6px;
+}
+/* a mesma arte nas duas portas: cada uma mostra a sua metade */
+.ci-art {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 200%;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  padding: 13% 18px 0;
+  text-align: center;
+  color: var(--navy-900);
+  background:
+    radial-gradient(circle at 50% 108%, var(--blue-100) 0 34%, transparent 34.2%),
+    radial-gradient(circle at 50% 108%, transparent 0 40%, rgba(31, 95, 191, 0.14) 40.2% 40.8%, transparent 41%);
+}
+.ci-r .ci-art {
+  left: -100%;
+}
+.ci-for {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--blue-600);
+}
+.ci-guest {
+  margin: 4px 0 0;
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variation-settings: "opsz" 72;
+  font-size: clamp(16px, 8.3cqw, 30px);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.ci-name {
+  margin: 8% 0 0;
+  font-family: var(--font-script), cursive;
+  font-size: clamp(36px, 21.6cqw, 78px);
+  line-height: 1.1;
+  color: var(--blue-600);
+}
+.ci-date {
+  margin: 4px 0 0;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  color: var(--navy-800);
+}
+/* fita e laço */
+.ci-ribbon {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 64%;
+  height: 0;
+  z-index: 3;
+  transform-origin: 50% 0;
+}
+.ci-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -13px;
+  height: 26px;
+  background: linear-gradient(180deg, var(--blue-400), var(--blue-600) 45%, var(--navy-800));
+  box-shadow: 0 10px 18px -10px rgba(5, 13, 31, 0.8);
+}
+.ci-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 2px;
+  background: rgba(214, 232, 251, 0.55);
+}
+.ci-bow {
+  position: absolute;
+  left: 50%;
+  top: -38px;
+  width: 112px;
+  height: 84px;
+  margin-left: -56px;
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 10px 10px rgba(5, 13, 31, 0.45));
+}
+.ci-bow:active {
+  cursor: grabbing;
+}
+.bow-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ci-hint {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--blue-100);
+}
+.ci-arrow {
+  display: inline-block;
+  font-size: 18px;
+  animation: ci-down 1.6s ease-in-out infinite;
+}
+@keyframes ci-down {
+  50% {
+    transform: translateY(6px);
+  }
+}

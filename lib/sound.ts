@@ -1,5 +1,6 @@
 "use client";
-// Efeitos sonoros discretos, sintetizados no próprio browser (sem ficheiros, sem serviços externos).
+// Efeitos sonoros discretos. O canudo a bater no chão usa gravações reais (public/sounds/tube-hit-*.mp3);
+// os outros efeitos também são gravações reais (ver SAMPLES). Se faltarem ficheiros, o canudo é sintetizado e os outros calam-se.
 // Só tocam depois de o convidado tocar no ecrã (regra dos telemóveis) e podem ser desligados.
 
 let ctx: AudioContext | null = null;
@@ -17,6 +18,8 @@ export function unlockAudio() {
       master.connect(ctx.destination);
     }
     if (ctx.state === "suspended") void ctx.resume();
+    void loadTubeHits(ctx);
+    void loadSamples(ctx);
   } catch {
     ctx = null;
   }
@@ -53,143 +56,147 @@ function env(c: AudioContext, g: GainNode, t: number, a: number, peak: number, d
   g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
 }
 
-/** Sopro de ar (movimento de câmara, saltos). */
-export function whoosh(dur = 0.6, vol = 0.35) {
-  const r = ready();
-  if (!r) return;
-  const { c, out } = r;
-  const t = c.currentTime;
-  const n = noise(c);
-  const f = c.createBiquadFilter();
-  f.type = "bandpass";
-  f.Q.value = 0.9;
-  f.frequency.setValueAtTime(300, t);
-  f.frequency.exponentialRampToValueAtTime(2200, t + dur * 0.55);
-  f.frequency.exponentialRampToValueAtTime(500, t + dur);
-  const g = c.createGain();
-  env(c, g, t, dur * 0.45, vol, dur * 0.55);
-  n.connect(f).connect(g).connect(out);
-  n.start(t);
-  n.stop(t + dur + 0.05);
+/* ── Gravações reais (CC0, Freesound) ─────────────────────────────
+   Sons de objectos verdadeiros, discretos, nada de "bips" de jogo:
+   whoosh = ar a passar · ribbon = tecido/fita · unfold = papel grosso a desdobrar
+   stamp = carimbo na mesa · tick = lápis a fazer um visto · toast = brinde de copos */
+const SAMPLES = {
+  whoosh: "/sounds/whoosh.mp3",
+  ribbon: "/sounds/ribbon.mp3",
+  unfold: "/sounds/unfold.mp3",
+  stamp: "/sounds/stamp.mp3",
+  tick: "/sounds/tick.mp3",
+  toast: "/sounds/toast.mp3",
+} as const;
+type Sample = keyof typeof SAMPLES;
+const bufs: Partial<Record<Sample, AudioBuffer>> = {};
+let samplesLoading = false;
+
+async function loadSamples(c: AudioContext) {
+  if (samplesLoading) return;
+  samplesLoading = true;
+  await Promise.all(
+    (Object.keys(SAMPLES) as Sample[]).map(async (k) => {
+      try {
+        const r = await fetch(SAMPLES[k]);
+        if (r.ok) bufs[k] = await c.decodeAudioData(await r.arrayBuffer());
+      } catch {}
+    }),
+  );
 }
 
-/** Passo leve (corrida). */
-export function step(vol = 0.12) {
+function play(name: Sample, vol: number, rate = 1) {
   const r = ready();
-  if (!r) return;
+  const buf = bufs[name];
+  if (!r || !buf) return;
   const { c, out } = r;
-  const t = c.currentTime;
-  const n = noise(c);
-  const f = c.createBiquadFilter();
-  f.type = "lowpass";
-  f.frequency.value = 900 + Math.random() * 300;
+  const src = c.createBufferSource();
+  src.buffer = buf;
+  src.playbackRate.value = rate * (0.97 + Math.random() * 0.06); // nunca exactamente igual
   const g = c.createGain();
-  env(c, g, t, 0.005, vol, 0.07);
-  n.connect(f).connect(g).connect(out);
-  n.start(t);
-  n.stop(t + 0.1);
+  g.gain.value = vol;
+  src.connect(g).connect(out);
+  src.start();
 }
 
-/** "Pop" redondo (o canudo a saltar da mochila). */
-export function pop(freq = 520, vol = 0.32) {
-  const r = ready();
-  if (!r) return;
-  const { c, out } = r;
-  const t = c.currentTime;
+/** Ar a passar (saltos, o capelo atirado). */
+export const whoosh = (vol = 0.3) => play("whoosh", vol);
+/** Tecido: a fita, o canudo a sair da mochila, o vestido a mudar de cor. */
+export const ribbon = (vol = 0.35) => play("ribbon", vol);
+/** Papel grosso a desdobrar: o cartão a chegar e as portas a abrir. */
+export const unfold = (vol = 0.35) => play("unfold", vol);
+/** Carimbo na mesa. */
+export const stamp = (vol = 0.5) => play("stamp", vol);
+/** Lápis a fazer um visto (lançamentos, copiar). */
+export const tick = (vol = 0.3) => play("tick", vol);
+/** Dois copos a brindar: os momentos de festa. */
+export const toast = (vol = 0.3) => play("toast", vol);
+/** A data encaixa: um carimbo muito baixo e mais grave. */
+export const settle = () => play("stamp", 0.16, 0.8);
+
+// Nomes antigos (usados pela base da versão 2.5D): apontam para as gravações.
+export const step = (_vol?: number) => {};
+export const pop = (_f?: number, vol = 0.3) => ribbon(vol);
+export const thud = (vol = 0.5, _f?: number) => stamp(vol);
+export const paper = (_d?: number, vol = 0.3) => unfold(vol);
+export const chime = (_f?: number, vol = 0.2) => toast(vol * 1.6);
+
+/* ── Canudo de cartão a bater no chão ─────────────────────────────── */
+// Para trocar o som: substitui public/sounds/tube-hit-1.mp3 (1.ª pancada, a mais forte)
+// e tube-hit-2/3.mp3 (ressaltos). Qualquer duração curta (< 1 s) serve.
+const TUBE_FILES = ["/sounds/tube-hit-1.mp3", "/sounds/tube-hit-2.mp3", "/sounds/tube-hit-3.mp3"];
+let tubeBufs: (AudioBuffer | null)[] | null = null;
+let tubeLoading = false;
+
+async function loadTubeHits(c: AudioContext) {
+  if (tubeBufs || tubeLoading) return;
+  tubeLoading = true;
+  tubeBufs = await Promise.all(
+    TUBE_FILES.map(async (u) => {
+      try {
+        const r = await fetch(u);
+        if (!r.ok) return null;
+        return await c.decodeAudioData(await r.arrayBuffer());
+      } catch {
+        return null;
+      }
+    }),
+  );
+}
+
+/** Síntese de reserva: tubo oco = ressonâncias curtas + pancada grave. */
+function tubeSynth(c: AudioContext, out: AudioNode, t: number, vol: number, pitch: number) {
+  for (const [f, q, a] of [
+    [190 * pitch, 9, 1],
+    [430 * pitch, 7, 0.55],
+    [910 * pitch, 5, 0.25],
+  ]) {
+    const n = noise(c);
+    const bp = c.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = f;
+    bp.Q.value = q;
+    const g = c.createGain();
+    env(c, g, t, 0.002, vol * a * 2.2, 0.16);
+    n.connect(bp).connect(g).connect(out);
+    n.start(t);
+    n.stop(t + 0.25);
+  }
   const o = c.createOscillator();
-  o.type = "sine";
-  o.frequency.setValueAtTime(freq, t);
-  o.frequency.exponentialRampToValueAtTime(freq * 2.2, t + 0.09);
+  o.frequency.setValueAtTime(140 * pitch, t);
+  o.frequency.exponentialRampToValueAtTime(70 * pitch, t + 0.12);
   const g = c.createGain();
-  env(c, g, t, 0.006, vol, 0.16);
+  env(c, g, t, 0.003, vol * 0.7, 0.14);
   o.connect(g).connect(out);
   o.start(t);
   o.stop(t + 0.2);
 }
 
-/** Pancada surda (cair no chão, carimbo). */
-export function thud(vol = 0.5, freq = 120) {
+/**
+ * Uma pancada do canudo. `strength` 0–1 (1 = primeira queda), `index` = n.º do ressalto.
+ * Cada ressalto fica mais fraco, mais curto e um pouco mais agudo.
+ */
+export function tubeHit(strength = 1, index = 0) {
   const r = ready();
   if (!r) return;
   const { c, out } = r;
   const t = c.currentTime;
-  const o = c.createOscillator();
-  o.type = "sine";
-  o.frequency.setValueAtTime(freq * 1.6, t);
-  o.frequency.exponentialRampToValueAtTime(freq * 0.5, t + 0.18);
-  const g = c.createGain();
-  env(c, g, t, 0.004, vol, 0.22);
-  o.connect(g).connect(out);
-  const n = noise(c);
-  const f = c.createBiquadFilter();
-  f.type = "lowpass";
-  f.frequency.value = 700;
-  const g2 = c.createGain();
-  env(c, g2, t, 0.002, vol * 0.4, 0.06);
-  n.connect(f).connect(g2).connect(out);
-  o.start(t);
-  o.stop(t + 0.3);
-  n.start(t);
-  n.stop(t + 0.1);
-}
-
-/** Restolhar de papel (fita, desenrolar). */
-export function paper(dur = 0.5, vol = 0.22) {
-  const r = ready();
-  if (!r) return;
-  const { c, out } = r;
-  const t = c.currentTime;
-  const n = noise(c);
-  const f = c.createBiquadFilter();
-  f.type = "highpass";
-  f.frequency.value = 1800;
-  const g = c.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  // pequenas irregularidades para soar a papel
-  for (let i = 0; i < 10; i++) {
-    const tt = t + (dur * i) / 10;
-    g.gain.linearRampToValueAtTime(vol * (0.35 + Math.random() * 0.65), tt + 0.01);
-    g.gain.linearRampToValueAtTime(vol * 0.12, tt + dur / 12);
+  const s = Math.max(0.05, Math.min(1, strength));
+  const vol = 0.95 * Math.pow(s, 0.8);
+  const pitch = 1 + (1 - s) * 0.12;
+  const buf = tubeBufs?.[Math.min(index, TUBE_FILES.length - 1)] ?? tubeBufs?.[0] ?? null;
+  if (!buf) {
+    tubeSynth(c, out, t, vol * 0.5, pitch);
+    return;
   }
-  g.gain.linearRampToValueAtTime(0.0001, t + dur);
-  n.connect(f).connect(g).connect(out);
-  n.start(t);
-  n.stop(t + dur + 0.05);
-}
-
-/** Pequeno brilho (acordes de duas notas). */
-export function chime(base = 784, vol = 0.18) {
-  const r = ready();
-  if (!r) return;
-  const { c, out } = r;
-  const t = c.currentTime;
-  [1, 1.5, 2].forEach((m, i) => {
-    const o = c.createOscillator();
-    o.type = "triangle";
-    o.frequency.value = base * m;
-    const g = c.createGain();
-    env(c, g, t + i * 0.07, 0.01, vol / (i + 1), 0.9);
-    o.connect(g).connect(out);
-    o.start(t + i * 0.07);
-    o.stop(t + i * 0.07 + 1);
-  });
-}
-
-/** Tique (lançamentos do balancete, chocalhar). */
-export function tick(freq = 1800, vol = 0.12) {
-  const r = ready();
-  if (!r) return;
-  const { c, out } = r;
-  const t = c.currentTime;
-  const o = c.createOscillator();
-  o.type = "square";
-  o.frequency.value = freq;
-  const f = c.createBiquadFilter();
-  f.type = "bandpass";
-  f.frequency.value = freq;
+  const src = c.createBufferSource();
+  src.buffer = buf;
+  src.playbackRate.value = pitch * (0.97 + Math.random() * 0.06);
+  const lp = c.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 2500 + 6000 * s; // os ressaltos fracos perdem brilho
   const g = c.createGain();
-  env(c, g, t, 0.002, vol, 0.03);
-  o.connect(f).connect(g).connect(out);
-  o.start(t);
-  o.stop(t + 0.05);
+  g.gain.value = vol;
+  src.connect(lp).connect(g).connect(out);
+  src.start(t);
 }

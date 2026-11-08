@@ -617,3 +617,526 @@
 .adm-login .adm-btn {
   width: 100%;
 }
+
+/* Entrada (à porta) */
+.adm-door {
+  max-width: 520px;
+}
+.adm-door-count {
+  margin: 0 0 16px;
+  color: var(--mocca);
+}
+.adm-door-count strong {
+  color: var(--ink);
+  font-size: 20px;
+}
+.adm-door-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 10px;
+  align-items: center;
+}
+.adm-door-form label {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mocca);
+}
+.adm-door-input {
+  min-height: 56px;
+  padding: 0 16px;
+  font: 600 26px/1 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  min-width: 0;
+}
+.adm-door-form .adm-btn {
+  min-height: 56px;
+}
+.adm-door-label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mocca);
+}
+.adm-door-list {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.adm-door-list .adm-door-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 0;
+}
+.adm-door-card.in {
+  background: var(--blue-50);
+}
+.adm-door-card {
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.adm-door-card.ok {
+  border-color: #2f8f5b;
+  box-shadow: inset 0 0 0 2px #2f8f5b;
+}
+.adm-door-card.already,
+.adm-door-card.invalid {
+  border-color: #b3261e;
+  box-shadow: inset 0 0 0 2px #b3261e;
+}
+.adm-door-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+}
+.adm-door-meta {
+  margin: 4px 0 0;
+  color: var(--mocca);
+}
+.adm-door-msg {
+  margin: 12px 0 0;
+  font-weight: 600;
+}
+.adm-door-msg.ok {
+  color: #2f8f5b;
+}
+.adm-door-msg.bad {
+  color: #b3261e;
+}
+.adm-door-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* ═════ Tema do convite (azul-noite, Fraunces, Pinyon Script) ═════ */
+.adm {
+  --line: rgba(10, 31, 68, 0.12);
+  --soft: rgba(31, 95, 191, 0.07);
+  --card: #ffffff;
+  background:
+    radial-gradient(120% 60% at 100% 0%, rgba(141, 188, 242, 0.35), transparent 60%),
+    linear-gradient(#f4f8fe, #eef5fd);
+  color: var(--ink);
+}
+.adm-head {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 18px;
+  padding: 26px 24px 24px;
+  border-radius: 24px;
+  color: var(--white);
+  background:
+    radial-gradient(60% 90% at 105% -10%, rgba(79, 143, 230, 0.55), transparent 60%),
+    radial-gradient(50% 80% at -10% 120%, rgba(31, 95, 191, 0.55), transparent 60%),
+    linear-gradient(160deg, var(--navy-800), var(--navy-900) 55%, var(--navy-950));
+  box-shadow: 0 30px 60px -36px rgba(5, 13, 31, 0.9);
+  animation: adm-rise 0.7s var(--ease-out) both;
+}
+.adm-head::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 26px rgba(255, 255, 255, 0.03), 0 0 0 52px rgba(255, 255, 255, 0.02);
+  pointer-events: none;
+}
+.adm-head .adm-kicker {
+  color: var(--blue-300);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  font-size: 11px;
+}
+.adm-head h1 {
+  color: var(--white);
+  font-size: clamp(30px, 6vw, 44px);
+}
+.adm-script {
+  font-family: var(--font-script), cursive;
+  font-weight: 400;
+  font-size: 1.45em;
+  line-height: 0.8;
+  letter-spacing: 0;
+  color: var(--blue-100);
+}
+.adm-countdown {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+}
+.adm-head-actions {
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+.adm-head .adm-btn-ghost {
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.06);
+}
+.adm-head .adm-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.adm-banner {
+  background: var(--blue-50);
+  border: 1px dashed var(--blue-300);
+  color: var(--navy-800);
+}
+.adm-btn-primary {
+  background: var(--blue-600);
+  color: var(--white);
+  box-shadow: 0 10px 20px -12px rgba(31, 95, 191, 0.9);
+}
+.adm-btn-primary:hover {
+  background: var(--blue-700);
+}
+.adm-btn-wa {
+  background: #1fa855;
+}
+.adm-btn-wa:hover {
+  background: #178a45;
+}
+.adm-stat,
+.adm-row,
+.adm-panel,
+.adm-messages li,
+.adm input,
+.adm select,
+.adm textarea {
+  background: var(--card);
+}
+.adm-stat {
+  border-color: var(--line);
+  box-shadow: 0 14px 30px -26px rgba(10, 31, 68, 0.6);
+  animation: adm-rise 0.6s var(--ease-out) both;
+}
+.adm-stat:nth-child(2) { animation-delay: 0.05s; }
+.adm-stat:nth-child(3) { animation-delay: 0.1s; }
+.adm-stat:nth-child(4) { animation-delay: 0.15s; }
+.adm-stat:nth-child(5) { animation-delay: 0.2s; }
+.adm-stat:nth-child(6) { animation-delay: 0.25s; }
+.adm-stat:nth-child(7) { animation-delay: 0.3s; }
+.adm-stat span,
+.adm-hero-stat span {
+  color: var(--blue-600);
+  font-weight: 700;
+}
+.adm-stat strong {
+  color: var(--navy-900);
+}
+.adm-hero-stat {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--blue-600), var(--blue-700) 60%, var(--navy-800));
+  animation: adm-rise 0.6s var(--ease-out) both;
+}
+.adm-hero-stat span {
+  color: var(--blue-100);
+}
+.adm-hero-stat strong {
+  color: var(--white);
+  animation: adm-pop 0.9s var(--ease-spring) 0.2s both;
+}
+.adm-hero-stat::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.18) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: adm-shine 2.8s ease-in-out 0.8s;
+  pointer-events: none;
+}
+.adm-tabs {
+  gap: 6px;
+  padding: 5px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(10, 31, 68, 0.06);
+}
+.adm-tabs button {
+  border: 0;
+  margin: 0;
+  border-radius: 999px;
+  padding: 9px 16px;
+  color: var(--navy-800);
+  transition: background 0.25s, color 0.25s;
+}
+.adm-tabs button.on {
+  background: var(--navy-900);
+  color: var(--white);
+  box-shadow: 0 8px 16px -10px rgba(5, 13, 31, 0.9);
+}
+.adm-filters button {
+  background: var(--card);
+  color: var(--navy-800);
+}
+.adm-filters button.on {
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+  color: var(--white);
+}
+.adm-row {
+  border-color: var(--line);
+  box-shadow: 0 12px 24px -24px rgba(10, 31, 68, 0.7);
+  animation: adm-rise 0.5s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
+}
+.adm-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px -22px rgba(10, 31, 68, 0.6);
+}
+.adm-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--navy-900);
+}
+.adm-chip.ok {
+  background: rgba(31, 168, 85, 0.12);
+  color: #157a3e;
+}
+.adm-chip.bad {
+  background: rgba(179, 38, 30, 0.1);
+  color: #a3241c;
+}
+.adm-chip.warn {
+  background: #fff1d6;
+  color: #8a5300;
+}
+.adm-chip.gold {
+  background: var(--navy-900);
+  color: var(--blue-100);
+}
+.adm input:focus,
+.adm select:focus,
+.adm textarea:focus {
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 3px rgba(31, 95, 191, 0.18);
+}
+.adm-toast {
+  background: var(--navy-900);
+  color: var(--white);
+  animation: adm-rise 0.4s var(--ease-spring) both;
+}
+.adm-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  margin: 0 0 6px;
+}
+.adm-facts dt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-600);
+}
+.adm-facts dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+.adm-code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 18px !important;
+  letter-spacing: 0.1em;
+}
+
+/* Actividade */
+.adm-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.adm-feed li {
+  animation: adm-rise 0.45s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+.adm-feed-day {
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue-600);
+}
+.adm-feed-item {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.adm-feed-item p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.adm-feed-item time {
+  font-size: 13px;
+  color: rgba(11, 18, 32, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+.adm-feed-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--blue-300);
+}
+.adm-feed-item.ok .adm-feed-dot { background: #1fa855; }
+.adm-feed-item.bad .adm-feed-dot { background: #c0392b; }
+.adm-feed-item.gold .adm-feed-dot { background: var(--navy-900); box-shadow: 0 0 0 3px var(--blue-100); }
+.adm-feed-item.info .adm-feed-dot { background: var(--blue-600); }
+.adm-feed-item.mute .adm-feed-dot { background: rgba(10, 31, 68, 0.25); }
+
+/* Tutorial */
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+.tour-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 13, 31, 0.72);
+  animation: adm-fade 0.3s both;
+}
+.tour-spot {
+  position: fixed;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(5, 13, 31, 0.72), 0 0 0 3px var(--blue-300);
+  transition: left 0.45s var(--ease-out), top 0.45s var(--ease-out), width 0.45s var(--ease-out), height 0.45s var(--ease-out);
+  pointer-events: none;
+}
+.tour-spot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 18px;
+  border: 2px solid var(--blue-300);
+  animation: tour-pulse 1.6s ease-out infinite;
+}
+.tour-tip {
+  position: fixed;
+  padding: 20px 20px 16px;
+  border-radius: 20px;
+  background: var(--white);
+  color: var(--navy-900);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+  animation: adm-rise 0.4s var(--ease-spring) both;
+}
+.tour-arrow {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  background: var(--white);
+  transform: rotate(45deg);
+}
+.tour-tip.up .tour-arrow { top: -7px; }
+.tour-tip.down .tour-arrow { bottom: -7px; }
+.tour-count {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blue-600);
+}
+.tour-tip h3 {
+  margin: 4px 0 6px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--navy-900);
+}
+.tour-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #22324d;
+}
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 16px;
+}
+.tour-actions > div {
+  display: flex;
+  gap: 6px;
+}
+.tour-skip {
+  border: 0;
+  background: none;
+  padding: 8px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(11, 18, 32, 0.55);
+}
+.tour-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 12px;
+}
+.tour-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--blue-100);
+  transition: width 0.3s var(--ease-out), background 0.3s;
+}
+.tour-dots span.done { background: var(--blue-300); }
+.tour-dots span.on { width: 18px; background: var(--blue-600); }
+
+@keyframes adm-rise {
+  from { opacity: 0; transform: translateY(14px); }
+}
+@keyframes adm-pop {
+  from { opacity: 0; transform: scale(0.6); }
+}
+@keyframes adm-shine {
+  to { transform: translateX(100%); }
+}
+@keyframes adm-fade {
+  from { opacity: 0; }
+}
+@keyframes tour-pulse {
+  from { opacity: 0.9; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-head, .adm-stat, .adm-hero-stat, .adm-hero-stat strong, .adm-row, .adm-feed li, .tour-tip, .tour-spot::after, .adm-hero-stat::after {
+    animation: none !important;
+  }
+}

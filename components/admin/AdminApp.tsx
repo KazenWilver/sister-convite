@@ -1,7 +1,8 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AdminGuest } from "@/lib/admin";
-import type { Settings } from "@/lib/store/types";
+import type { LogEntry, Settings } from "@/lib/store/types";
+import { Tour, tourSeen, type TourStep } from "./Tour";
 import "./admin.css";
 
 type Stats = {
@@ -22,12 +23,14 @@ type Stats = {
   messages: number;
 };
 
-type Tab = "guests" | "messages" | "import" | "settings";
-type Filter = "all" | "unsent" | "noanswer" | "yes" | "no" | "pending" | "confirmed" | "declined" | "waitlist" | "replaced";
+type Tab = "guests" | "activity" | "messages" | "door" | "import" | "settings";
+type Filter = "all" | "unsent" | "unopened" | "opened" | "noanswer" | "yes" | "no" | "pending" | "confirmed" | "declined" | "waitlist" | "replaced";
 
 const FILTERS: [Filter, string][] = [
   ["all", "Todos"],
   ["unsent", "Por enviar"],
+  ["unopened", "Enviados, por abrir"],
+  ["opened", "Já abriram"],
   ["noanswer", "Sem resposta"],
   ["yes", "Intenção: sim"],
   ["no", "Intenção: não"],
@@ -45,6 +48,10 @@ function matches(g: AdminGuest, f: Filter): boolean {
       return g.status !== "replaced";
     case "unsent":
       return active && !g.sentAt;
+    case "unopened":
+      return active && !!g.sentAt && !g.firstOpenedAt;
+    case "opened":
+      return active && !!g.firstOpenedAt;
     case "noanswer":
       return active && !g.stage1 && !g.stage2;
     case "yes":
@@ -105,16 +112,40 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<AdminGuest | "new" | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [log, setLog] = useState<LogEntry[]>([]);
+  const [tour, setTour] = useState(false);
+  const lastSeen = useRef<string | null>(null);
 
   const load = useCallback(async () => {
-    const d = await api<{ guests: AdminGuest[]; stats: Stats; settings: Settings }>("/api/admin/guests");
+    const d = await api<{ guests: AdminGuest[]; stats: Stats; settings: Settings; log: LogEntry[] }>("/api/admin/guests");
     setGuests(d.guests);
     setStats(d.stats);
     setSettings(d.settings);
+    setLog(d.log);
+    // novidades desde a última actualização (respostas, mensagens, aberturas)
+    const top = d.log[0]?.at ?? null;
+    if (lastSeen.current && top && top > lastSeen.current) {
+      const fresh = d.log.filter((e) => e.at > lastSeen.current! && e.action !== "sent");
+      const g = fresh[0] && d.guests.find((x) => x.id === fresh[0].guestId);
+      if (g) {
+        setToast(`${g.displayName} ${describe(fresh[0]).text}${fresh.length > 1 ? ` (+${fresh.length - 1})` : ""}`);
+        window.setTimeout(() => setToast(null), 4200);
+      }
+    }
+    if (top) lastSeen.current = top;
   }, []);
 
   useEffect(() => {
     load().catch(() => undefined);
+    // actualiza sozinho a cada 30 s (e quando se volta ao separador)
+    const t = window.setInterval(() => document.visibilityState === "visible" && load().catch(() => undefined), 30_000);
+    const vis = () => document.visibilityState === "visible" && load().catch(() => undefined);
+    document.addEventListener("visibilitychange", vis);
+    if (!tourSeen()) window.setTimeout(() => setTour(true), 900);
+    return () => {
+      window.clearInterval(t);
+      document.removeEventListener("visibilitychange", vis);
+    };
   }, [load]);
 
   const notify = (m: string) => {
@@ -154,11 +185,17 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
   return (
     <div className="adm">
       <header className="adm-head">
-        <div>
-          <p className="adm-kicker">Licenciatura da Juceline · 28 Nov 2026</p>
-          <h1>Convidados</h1>
+        <div className="adm-head-text">
+          <p className="adm-kicker">Licenciatura · 28 · 11 · 2026</p>
+          <h1>
+            Painel da <span className="adm-script">Juceline</span>
+          </h1>
+          <p className="adm-countdown">{countdown()}</p>
         </div>
         <div className="adm-head-actions">
+          <button className="adm-btn adm-btn-ghost" onClick={() => setTour(true)} data-tour="help">
+            Tutorial
+          </button>
           <a className="adm-btn adm-btn-ghost" href="/api/admin/export">
             Exportar CSV
           </a>
@@ -176,16 +213,18 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
 
       {stats && <StatsBar s={stats} />}
 
-      <nav className="adm-tabs" role="tablist">
+      <nav className="adm-tabs" role="tablist" data-tour="tabs">
         {(
           [
-            ["guests", "Lista"],
+            ["guests", "Convidados"],
+            ["activity", "Actividade"],
             ["messages", `Mensagens${stats?.messages ? ` (${stats.messages})` : ""}`],
+            ["door", "Entrada"],
             ["import", "Importar"],
             ["settings", "Definições"],
           ] as [Tab, string][]
         ).map(([k, label]) => (
-          <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>
+          <button key={k} role="tab" data-tour={`tab-${k}`} aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>
             {label}
           </button>
         ))}
@@ -193,13 +232,13 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
 
       {tab === "guests" && (
         <section>
-          <div className="adm-tools">
+          <div className="adm-tools" data-tour="tools">
             <input className="adm-search" placeholder="Procurar nome ou grupo…" value={query} onChange={(e) => setQuery(e.target.value)} />
             <button className="adm-btn adm-btn-primary" onClick={() => setEditing("new")}>
               + Convidado
             </button>
           </div>
-          <div className="adm-filters">
+          <div className="adm-filters" data-tour="filters">
             {FILTERS.map(([k, label]) => (
               <button key={k} className={filter === k ? "on" : ""} onClick={() => setFilter(k)}>
                 {label} <span>{guests.filter((g) => matches(g, k)).length}</span>
@@ -222,8 +261,8 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
             </div>
           ) : (
             <ul className="adm-list">
-              {visible.map((g) => (
-                <li key={g.id} className="adm-row">
+              {visible.map((g, i) => (
+                <li key={g.id} className="adm-row" style={{ "--i": Math.min(i, 12) } as React.CSSProperties} data-tour={i === 0 ? "row" : undefined}>
                   <div className="adm-row-main">
                     <button className="adm-name" onClick={() => setEditing(g)}>
                       {g.displayName}
@@ -236,11 +275,21 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
                       {g.notes && <span className="adm-note">{g.notes}</span>}
                     </div>
                   </div>
-                  <div className="adm-chips">
+                  <div className="adm-chips" data-tour-chips>
                     <Chip tone={g.status === "waitlist" ? "warn" : g.status === "replaced" ? "mute" : g.sentAt ? "ok" : "mute"}>
                       {g.status === "waitlist" ? "Lista de espera" : g.status === "replaced" ? "Substituído" : g.sentAt ? "Enviado" : "Por enviar"}
                     </Chip>
-                    {g.firstOpenedAt && <Chip tone="ok" title={`Última visita: ${fmt(g.lastOpenedAt)}`}>Aberto ×{g.openCount}</Chip>}
+                    {g.firstOpenedAt && (
+                      <Chip tone="ok" title={`Última visita: ${fmt(g.lastOpenedAt)}`}>
+                        Aberto ×{g.openCount}
+                      </Chip>
+                    )}
+                    {g.devices.length > Math.max(2, g.seats + 1) && (
+                      <Chip tone="warn" title="O link foi aberto em mais telemóveis do que o normal: pode ter sido reencaminhado.">
+                        ⚠ {g.devices.length} dispositivos
+                      </Chip>
+                    )}
+                    {g.checkedInAt && <Chip tone="gold">Entrou {fmt(g.checkedInAt).slice(-5)}</Chip>}
                     <Chip tone={g.stage1 === "yes" ? "ok" : g.stage1 === "no" ? "bad" : "mute"}>
                       1 · {g.stage1 === "yes" ? `Sim (${g.attending})` : g.stage1 === "no" ? "Não" : "—"}
                     </Chip>
@@ -248,14 +297,14 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
                       2 · {g.stage2 === "confirmed" ? `Confirmado (${g.attending})` : g.stage2 === "declined" ? "Recusou" : "—"}
                     </Chip>
                   </div>
-                  <div className="adm-row-actions">
+                  <div className="adm-row-actions" data-tour-actions>
                     <button className="adm-btn adm-btn-wa" onClick={() => sendWa(g, g.stage1 === "yes" && !g.stage2 && settings?.finalOpen ? "reminder" : "invite")} disabled={!g.link}>
                       {g.stage1 === "yes" && !g.stage2 && settings?.finalOpen ? "Lembrar" : "WhatsApp"}
                     </button>
                     <button className="adm-btn adm-btn-ghost" onClick={() => copy(g)} disabled={!g.link}>
                       Copiar link
                     </button>
-                    <a className="adm-btn adm-btn-ghost" href={g.link ?? "#"} target="_blank" rel="noopener noreferrer">
+                    <a className="adm-btn adm-btn-ghost" href={g.link ? `${g.link}?preview=1` : "#"} target="_blank" rel="noopener noreferrer" title="Abre o convite sem contar como visita do convidado">
                       Ver
                     </a>
                   </div>
@@ -266,6 +315,8 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
         </section>
       )}
 
+      {tab === "activity" && <Activity log={log} guests={guests} />}
+      {tab === "door" && <Door guests={guests} onChange={load} />}
       {tab === "messages" && <Messages guests={guests} />}
       {tab === "import" && <ImportPanel onDone={async (n) => (await load(), notify(`${n} convites importados`), setTab("guests"))} />}
       {tab === "settings" && settings && <SettingsPanel initial={settings} onSaved={async () => (await load(), notify("Definições guardadas"))} />}
@@ -284,6 +335,8 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
         />
       )}
 
+      {tour && <Tour steps={tourSteps(setTab, setFilter)} onClose={() => (setTour(false), setTab("guests"))} />}
+
       {toast && (
         <div className="adm-toast" role="status">
           {toast}
@@ -292,6 +345,104 @@ export function AdminApp({ localMode }: { localMode: boolean }) {
     </div>
   );
 }
+
+function countdown(): string {
+  const d = Math.ceil((new Date("2026-11-28T18:00:00+01:00").getTime() - Date.now()) / 864e5);
+  if (d > 1) return `Faltam ${d} dias para a festa`;
+  if (d === 1) return "A festa é amanhã!";
+  if (d === 0) return "É hoje!";
+  return "A festa já aconteceu. Obrigado!";
+}
+
+/** Frase e tom de cada acontecimento do registo. */
+function describe(e: LogEntry): { text: string; tone: "ok" | "bad" | "info" | "gold" | "mute" } {
+  const [v, n] = (e.value ?? "").split(":");
+  const people = Number(n) > 1 ? ` (${n} pessoas)` : "";
+  switch (e.action) {
+    case "open":
+      return { text: "abriu o convite pela primeira vez", tone: "info" };
+    case "sent":
+      return { text: "recebeu o convite por WhatsApp", tone: "mute" };
+    case "stage1":
+      return v === "yes" ? { text: `disse que vem${people}`, tone: "ok" } : { text: "disse que não pode ir", tone: "bad" };
+    case "stage2":
+      return v === "confirmed" ? { text: `confirmou a presença${people}`, tone: "gold" } : { text: "desconfirmou: afinal não vem", tone: "bad" };
+    case "message":
+      return { text: "deixou uma mensagem para a Juceline", tone: "info" };
+    case "checkin":
+      return { text: `entrou na festa${Number(e.value) > 1 ? ` (${e.value} pessoas)` : ""}`, tone: "gold" };
+    case "checkin-undo":
+      return { text: "teve a entrada anulada", tone: "mute" };
+    case "replaced":
+      return { text: "foi substituído por outro convidado", tone: "mute" };
+    default:
+      return { text: e.action, tone: "mute" };
+  }
+}
+
+function Activity({ log, guests }: { log: LogEntry[]; guests: AdminGuest[] }) {
+  const [only, setOnly] = useState<"all" | "answers">("all");
+  const byId = useMemo(() => new Map(guests.map((g) => [g.id, g])), [guests]);
+  const list = log.filter((e) => byId.has(e.guestId) && (only === "all" || ["stage1", "stage2", "message", "checkin"].includes(e.action)));
+  if (!log.length)
+    return (
+      <div className="adm-empty">
+        <p>Ainda não aconteceu nada. Quando alguém abrir o convite ou responder, aparece aqui.</p>
+      </div>
+    );
+  let day = "";
+  return (
+    <section className="adm-activity">
+      <div className="adm-filters">
+        <button className={only === "all" ? "on" : ""} onClick={() => setOnly("all")}>
+          Tudo
+        </button>
+        <button className={only === "answers" ? "on" : ""} onClick={() => setOnly("answers")}>
+          Só respostas e mensagens
+        </button>
+      </div>
+      <ol className="adm-feed">
+        {list.map((e, i) => {
+          const g = byId.get(e.guestId)!;
+          const d = describe(e);
+          const label = new Date(e.at).toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Luanda" });
+          const head = label !== day ? ((day = label), label) : null;
+          return (
+            <li key={`${e.at}-${i}`} style={{ "--i": Math.min(i, 14) } as React.CSSProperties}>
+              {head && <p className="adm-feed-day">{head}</p>}
+              <div className={`adm-feed-item ${d.tone}`}>
+                <span className="adm-feed-dot" aria-hidden="true" />
+                <p>
+                  <strong>{g.displayName}</strong> {d.text}
+                </p>
+                <time>{new Date(e.at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Luanda" })}</time>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+function tourSteps(setTab: (t: Tab) => void, setFilter: (f: Filter) => void): TourStep[] {
+  const list = () => (setTab("guests"), setFilter("all"));
+  return [
+    { title: "Olá! Bem-vinda ao painel", text: "Daqui controlas tudo sobre os convites da festa: enviar, ver quem abriu, quem confirmou e ler as mensagens. São só alguns passos e podes rever este tutorial quando quiseres.", before: list },
+    { target: ".adm-stats", title: "Os números da festa", text: "O número grande é quantas pessoas já confirmaram. Ao lado: convites enviados e abertos, quem disse sim, quem ainda não respondeu e quem recusou. Actualiza sozinho a cada 30 segundos.", before: list },
+    { target: '[data-tour="tabs"]', title: "As páginas do painel", text: "«Convidados» é a lista. «Actividade» mostra tudo o que acontece, pela ordem. «Mensagens» são os recados para a Juceline. «Entrada» serve no dia da festa, à porta.", before: list },
+    { target: '[data-tour="tools"]', title: "Procurar e acrescentar", text: "Escreve um nome para o encontrar. Para convidar alguém novo, toca em «+ Convidado»: o convite e o link ficam prontos na hora.", before: list },
+    { target: '[data-tour="filters"]', title: "Filtros", text: "Mostra só quem precisas: quem falta enviar, quem recebeu e ainda não abriu, quem disse sim, quem falta confirmar, quem recusou.", before: list },
+    { target: '[data-tour="row"] [data-tour-actions]', title: "Enviar o convite", text: "«WhatsApp» abre a conversa com a mensagem e o link já escritos: só tens de carregar em enviar, e o convite fica marcado como enviado. «Ver» mostra o convite tal como o convidado o vê.", before: list },
+    { target: '[data-tour="row"] [data-tour-chips]', title: "O estado de cada convite", text: "As etiquetas dizem tudo: enviado, aberto (e quantas vezes), a resposta (1 · Sim / Não) e a confirmação final (2). Se aparecer «⚠ dispositivos», o link foi aberto em muitos telemóveis e pode ter sido reencaminhado.", before: list },
+    { target: '[data-tour="row"] .adm-name', title: "Editar um convidado", text: "Toca no nome para mudar lugares, telefone ou grupo, registar uma resposta dada por telefone, ver quando abriu o convite, gerar um link novo ou apagar respostas de teste.", before: list },
+    { target: '[data-tour="tab-activity"]', title: "Actividade", text: "Aqui vês, por ordem, quem abriu o convite, quem disse que vem, quem confirmou, quem desconfirmou e quem deixou mensagem. Quando chega algo novo, aparece um aviso em baixo.", before: list },
+    { target: '[data-tour="tab-door"]', title: "No dia da festa: Entrada", text: "À porta, escreve o nome de quem chega e carrega em «Registar entrada». Vês logo se a pessoa confirmou e, se o mesmo convite entrar duas vezes, o painel avisa.", before: list },
+    { target: '[data-tour="tab-settings"]', title: "Definições", text: "Hora, local, mapa e dress code. Mais perto da data, liga «Pedir a confirmação final» e usa o botão «Lembrar» em cada convidado.", before: list },
+    { target: '[data-tour="help"]', title: "Pronto!", text: "Já sabes o essencial. Se te esqueceres de alguma coisa, toca em «Tutorial» e vemos tudo outra vez.", before: list },
+  ];
+}
+
 
 function Chip({ children, tone, title }: { children: React.ReactNode; tone: "ok" | "bad" | "mute" | "warn" | "gold"; title?: string }) {
   return (
@@ -311,7 +462,7 @@ function StatsBar({ s }: { s: Stats }) {
     ["Recusaram", s.stage1No + s.finalDeclined],
   ];
   return (
-    <div className="adm-stats">
+    <div className="adm-stats" data-tour="stats">
       <div className="adm-hero-stat">
         <span>Presenças confirmadas</span>
         <strong>{s.finalConfirmedPeople}</strong>
@@ -325,6 +476,78 @@ function StatsBar({ s }: { s: Stats }) {
         </div>
       ))}
     </div>
+  );
+}
+
+/** À porta: procurar o convidado pelo nome e registar a entrada (só uma vez). */
+function Door({ guests, onChange }: { guests: AdminGuest[]; onChange: () => Promise<void> }) {
+  const [q, setQ] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [flash, setFlash] = useState<{ id: string; ok: boolean; text: string } | null>(null);
+  const inside = guests.filter((g) => g.checkedInAt);
+  const people = inside.reduce((a, g) => a + g.checkedInPeople, 0);
+  const term = q.trim().toLowerCase();
+  const list = guests
+    .filter((g) => g.status === "active" && (!term || `${g.displayName} ${g.fullName ?? ""} ${g.groupName ?? ""}`.toLowerCase().includes(term)))
+    .sort((a, b) => Number(b.hasPass) - Number(a.hasPass) || a.displayName.localeCompare(b.displayName))
+    .slice(0, term ? 20 : 40);
+
+  async function run(g: AdminGuest, action: "checkin" | "undo") {
+    setBusy(g.id);
+    try {
+      const d = await api<{ guest: AdminGuest; already?: boolean }>("/api/admin/checkin", "POST", { id: g.id, action });
+      setFlash(
+        action === "undo"
+          ? { id: g.id, ok: true, text: "Entrada anulada." }
+          : d.already
+            ? { id: g.id, ok: false, text: `⚠ Já tinha entrado às ${fmt(d.guest.checkedInAt).slice(-5)}.` }
+            : { id: g.id, ok: true, text: "✓ Entrada registada. Boa festa!" },
+      );
+      await onChange();
+    } catch (e) {
+      setFlash({ id: g.id, ok: false, text: (e as Error).message });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <section className="adm-door">
+      <p className="adm-door-count">
+        Já entraram <strong>{people}</strong> {people === 1 ? "pessoa" : "pessoas"} ({inside.length} {inside.length === 1 ? "convite" : "convites"})
+      </p>
+      <label className="adm-door-label" htmlFor="door-q">
+        Quem está a chegar?
+      </label>
+      <input id="door-q" className="adm-search" placeholder="Escreve o nome…" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
+      <ul className="adm-door-list">
+        {list.map((g) => {
+          const n = g.attending || g.seats;
+          return (
+            <li key={g.id} className={`adm-door-card ${g.checkedInAt ? "in" : ""} ${flash?.id === g.id ? (flash.ok ? "ok" : "already") : ""}`}>
+              <div>
+                <p className="adm-door-name">{g.displayName}</p>
+                <p className="adm-door-meta">
+                  {n} {n > 1 ? "pessoas" : "pessoa"}
+                  {g.hasPass ? " · confirmou" : " · não confirmou"}
+                  {g.checkedInAt ? ` · entrou às ${fmt(g.checkedInAt).slice(-5)}` : ""}
+                </p>
+                {flash?.id === g.id && <p className={`adm-door-msg ${flash.ok ? "ok" : "bad"}`}>{flash.text}</p>}
+              </div>
+              {g.checkedInAt ? (
+                <button className="adm-btn adm-btn-ghost" disabled={busy === g.id} onClick={() => run(g, "undo")}>
+                  Anular
+                </button>
+              ) : (
+                <button className="adm-btn adm-btn-primary" disabled={busy === g.id} onClick={() => run(g, "checkin")}>
+                  Registar entrada
+                </button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
@@ -607,6 +830,29 @@ function GuestEditor({
               <input type="number" inputMode="numeric" min={0} max={f.seats} value={f.attending} onChange={(e) => set("attending", e.target.value)} />
             </label>
             {guest.message && <blockquote className="adm-quote">“{guest.message}”</blockquote>}
+            <h3>Convite único</h3>
+            <dl className="adm-facts">
+              <div>
+                <dt>Número</dt>
+                <dd>N.º {String(guest.sortOrder).padStart(3, "0")}</dd>
+              </div>
+              <div>
+                <dt>Enviado</dt>
+                <dd>{guest.sentAt ? fmt(guest.sentAt) : "ainda não"}</dd>
+              </div>
+              <div>
+                <dt>Aberto</dt>
+                <dd>{guest.firstOpenedAt ? `${guest.openCount}× · última ${fmt(guest.lastOpenedAt)}` : "ainda não"}</dd>
+              </div>
+              <div>
+                <dt>Telemóveis</dt>
+                <dd>{guest.devices.length || "—"}</dd>
+              </div>
+              <div>
+                <dt>Entrada</dt>
+                <dd>{guest.checkedInAt ? `${fmt(guest.checkedInAt)} · ${guest.checkedInPeople} pessoa(s)` : "—"}</dd>
+              </div>
+            </dl>
           </>
         )}
 

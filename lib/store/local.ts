@@ -1,13 +1,13 @@
 import "server-only";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { DEFAULT_SETTINGS, type Guest, type Settings, type Store } from "./types";
+import { DEFAULT_SETTINGS, type Guest, type LogEntry, type Settings, type Store } from "./types";
 
 // Base de dados LOCAL só para desenvolvimento (ficheiro .data/db.json, fora do Git).
 interface Db {
   guests: Guest[];
   settings: Settings;
-  log: { guestId: string; action: string; value: string | null; at: string }[];
+  log: LogEntry[];
 }
 
 const FILE = path.join(process.cwd(), ".data", "db.json");
@@ -17,6 +17,12 @@ async function read(): Promise<Db> {
   try {
     const db = JSON.parse(await fs.readFile(FILE, "utf8")) as Db;
     db.settings = { ...DEFAULT_SETTINGS, ...db.settings };
+    // convites criados antes destes campos existirem
+    for (const g of db.guests) {
+      g.devices ??= [];
+      g.checkedInAt ??= null;
+      g.checkedInPeople ??= 0;
+    }
     return db;
   } catch {
     return { guests: [], settings: { ...DEFAULT_SETTINGS }, log: [] };
@@ -78,6 +84,9 @@ export const localStore: Store = {
       db.settings = { ...db.settings, ...patch };
       return db.settings;
     });
+  },
+  async listLog(limit) {
+    return (await read()).log.slice(-limit).reverse();
   },
   log(guestId, action, value) {
     return tx((db) => {

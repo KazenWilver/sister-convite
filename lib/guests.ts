@@ -1,7 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { decryptToken, encryptToken, hashToken, isTokenShape, newToken } from "./crypto";
-import { inviteUrl } from "./config";
+import { decryptToken, encryptToken, hashToken, isTokenShape, newToken, sealSeed } from "./crypto";
+import { EVENT, inviteUrl } from "./config";
 import { store, type Guest, type Settings, type Stage1, type Stage2 } from "./store";
 
 export function newGuest(input: Partial<Guest> & { displayName: string }, sortOrder: number): { guest: Guest; token: string } {
@@ -26,6 +26,9 @@ export function newGuest(input: Partial<Guest> & { displayName: string }, sortOr
       firstOpenedAt: null,
       lastOpenedAt: null,
       openCount: 0,
+      devices: [],
+      checkedInAt: null,
+      checkedInPeople: 0,
       stage1: null,
       stage1At: null,
       stage2: null,
@@ -89,6 +92,13 @@ export interface PublicGuest {
   finalOpen: boolean;
   finalLocked: boolean;
   finalDeadline: string | null;
+  seed: number; // semente do selo único
+  answered: boolean; // já respondeu (sim ou não): o convite abre directo, sem abertura
+}
+
+/** Quem disse que vem (e não desistiu na confirmação final) tem passe de entrada. */
+export function hasPass(g: Guest): boolean {
+  return g.status === "active" && g.stage1 === "yes" && g.stage2 !== "declined" && g.attending > 0;
 }
 
 export function toPublic(g: Guest, s: Settings): PublicGuest {
@@ -103,6 +113,8 @@ export function toPublic(g: Guest, s: Settings): PublicGuest {
     finalOpen: s.finalOpen,
     finalLocked: finalLocked(s),
     finalDeadline: s.finalDeadline,
+    seed: sealSeed(g.id),
+    answered: Boolean(g.stage1 || g.stage2),
   };
 }
 
@@ -118,11 +130,11 @@ export interface PublicEvent {
 
 export function toPublicEvent(s: Settings): PublicEvent {
   return {
-    time: s.eventTime,
-    venueName: s.venueName,
+    time: s.eventTime || EVENT.time,
+    venueName: s.venueName || EVENT.venueName,
     address: s.address,
-    lat: s.lat,
-    lng: s.lng,
+    lat: s.lat ?? EVENT.lat,
+    lng: s.lng ?? EVENT.lng,
     dressCode: s.dressCode,
     dressCodeNote: s.dressCodeNote,
   };

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { Canudo } from "@/components/invite/Canudo";
-import { Character, createPuppet, IDLE, JUMP, runPose } from "@/components/invite/Character";
+import { Canudo } from "@/components/invite/shared/Canudo";
+import { Character, createPuppet, IDLE, JUMP, runPose } from "@/components/invite/shared/Character";
 
 export function CharacterSheet() {
   const refs = useRef<(SVGGElement | null)[]>([]);

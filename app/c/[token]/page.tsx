@@ -18,6 +18,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    manifest: `/c/${token}/manifest.webmanifest`,
+    appleWebApp: { capable: true, title: "Juceline 🎓", statusBarStyle: "black-translucent" },
+    icons: { icon: "/icons/icon-128.png", apple: "/icons/apple-touch-icon.png" },
     openGraph: { title, description, type: "website", locale: "pt_AO", siteName: "Convite da Juceline" },
     twitter: { card: "summary_large_image", title, description },
   };

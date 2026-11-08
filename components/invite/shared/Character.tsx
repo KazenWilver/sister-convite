@@ -4,8 +4,8 @@
 export const SKIN = "#7a4728";
 export const SKIN_D = "#62381f";
 export const HAIR = "#1d1108";
-export const GOLD = "#c9a35a";
-export const GOWN = "#3a2209";
+export const GOLD = "#d6e8fb";
+export const GOWN = "#0b1220";
 
 export type Pose = {
   thighF: number;
@@ -91,7 +91,7 @@ export function createPuppet(root: SVGGElement) {
 
 function Leg({ back }: { back?: boolean }) {
   const skin = back ? SKIN_D : SKIN;
-  const shoe = back ? "#d8c4ad" : "#f4e9dc";
+  const shoe = back ? "#d6e8fb" : "#ffffff";
   const x = back ? -10 : 0;
   const k = back ? "B" : "F";
   return (
@@ -101,23 +101,23 @@ function Leg({ back }: { back?: boolean }) {
         <rect x={x - 2} y={-66} width={12} height={58} rx={6} fill={skin} />
         <rect x={x - 2.5} y={-19} width={13} height={6} rx={2} fill={shoe} />
         <path d={`M${x - 5},-14 L${x + 12},-14 Q${x + 25},-14 ${x + 28},-6 L${x + 28},0 L${x - 5},0 Z`} fill={shoe} />
-        <rect x={x - 6} y={-3.5} width={35} height={4.5} rx={2} fill="#ab7743" />
-        <path d={`M${x + 6},-13 l6,4 M${x + 11},-13.5 l6,4`} stroke="#ab7743" strokeWidth={1.4} strokeLinecap="round" />
+        <rect x={x - 6} y={-3.5} width={35} height={4.5} rx={2} fill="#1f5fbf" />
+        <path d={`M${x + 6},-13 l6,4 M${x + 11},-13.5 l6,4`} stroke="#1f5fbf" strokeWidth={1.4} strokeLinecap="round" />
       </g>
     </g>
   );
 }
 
-export function Character({ gown = GOWN, withPackScroll = true, label }: { gown?: string; withPackScroll?: boolean; label?: string }) {
+export function Character({ gown = GOWN, withPackScroll = true, label, flat }: { gown?: string; withPackScroll?: boolean; label?: string; flat?: boolean }) {
   return (
-    <g aria-label={label} role={label ? "img" : undefined}>
+    <g aria-label={label} role={label ? "img" : undefined} className={flat ? "ch-flat" : undefined}>
       {/* sombra no chão */}
-      <ellipse cx={4} cy={2} rx={46} ry={6} fill="#2a1705" opacity={0.18} data-p="shadow" />
+      <ellipse cx={4} cy={2} rx={46} ry={6} fill="#050d1f" opacity={0.18} data-p="shadow" />
       <g data-p="body">
         {/* braço de trás */}
         <g data-p="armB">
           <path d="M-20,-202 Q-26,-176 -28,-150 Q-16,-143 -3,-150 Q-3,-176 0,-200 Z" fill={gown} />
-          <path d="M-20,-202 Q-26,-176 -28,-150 Q-16,-143 -3,-150 Q-3,-176 0,-200 Z" fill="#000" opacity={0.28} />
+          <path d="M-20,-202 Q-26,-176 -28,-150 Q-16,-143 -3,-150 Q-3,-176 0,-200 Z" fill="#000" opacity={0.28} data-shade />
           <circle cx={-15} cy={-142} r={6} fill={SKIN_D} />
         </g>
         <Leg back />
@@ -126,30 +126,30 @@ export function Character({ gown = GOWN, withPackScroll = true, label }: { gown?
         {/* canudo dentro da mochila */}
         {withPackScroll && (
           <g data-p="packScroll" transform="rotate(-30 -44 -190)">
-            <rect x={-52} y={-262} width={15} height={76} rx={7.5} fill="#efe2cf" />
+            <rect x={-52} y={-262} width={15} height={76} rx={7.5} fill="#ffffff" />
             <rect x={-52} y={-262} width={5} height={76} rx={2.5} fill="#fff" opacity={0.35} />
-            <ellipse cx={-44.5} cy={-261} rx={7.5} ry={3} fill="#d7bda6" />
-            <rect x={-52} y={-232} width={15} height={7} fill="#ab7743" />
+            <ellipse cx={-44.5} cy={-261} rx={7.5} ry={3} fill="#d6e8fb" />
+            <rect x={-52} y={-232} width={15} height={7} fill="#1f5fbf" />
             <rect x={-52} y={-232} width={15} height={1.4} fill={GOLD} />
           </g>
         )}
 
         {/* beca */}
         <path d="M-22,-200 Q-10,-210 2,-208 Q16,-210 24,-200 C31,-170 39,-118 45,-70 Q20,-60 -6,-62 Q-30,-62 -50,-70 C-42,-118 -32,-170 -22,-200 Z" fill={gown} />
-        <path d="M-14,-182 Q-22,-130 -31,-68 M9,-172 Q13,-120 17,-64" stroke="#000" strokeOpacity={0.22} strokeWidth={2.6} fill="none" strokeLinecap="round" />
-        <path d="M-50,-70 Q-6,-58 45,-70 L45,-66 Q-6,-54 -50,-66 Z" fill="#000" opacity={0.18} />
+        <path d="M-14,-182 Q-22,-130 -31,-68 M9,-172 Q13,-120 17,-64" stroke="#000" strokeOpacity={0.22} strokeWidth={2.6} fill="none" strokeLinecap="round" data-shade />
+        <path d="M-50,-70 Q-6,-58 45,-70 L45,-66 Q-6,-54 -50,-66 Z" fill="#000" opacity={0.18} data-shade />
         {/* gola e faixa */}
-        <path d="M-2,-209 L6,-195 L14,-209 Z" fill="#f4e9dc" />
-        <path d="M-5,-207 Q-7,-160 -9,-112 L0,-112 Q2,-160 4,-205 Z" fill="#97652f" />
-        <path d="M10,-207 Q17,-160 23,-106 L34,-108 Q28,-160 20,-205 Z" fill="#ab7743" />
+        <path d="M-2,-209 L6,-195 L14,-209 Z" fill="#ffffff" />
+        <path d="M-5,-207 Q-7,-160 -9,-112 L0,-112 Q2,-160 4,-205 Z" fill="#1b4fa0" />
+        <path d="M10,-207 Q17,-160 23,-106 L34,-108 Q28,-160 20,-205 Z" fill="#1f5fbf" />
         <path d="M10,-207 Q17,-160 23,-106" stroke={GOLD} strokeWidth={1.2} fill="none" />
 
         {/* mochila */}
-        <path d="M-50,-198 Q-61,-196 -61,-180 L-59,-128 Q-58,-115 -44,-115 L-24,-117 Q-15,-119 -16,-134 L-19,-190 Q-21,-200 -32,-200 Z" fill="#84593d" />
-        <path d="M-53,-196 Q-40,-207 -21,-196 L-20,-168 Q-38,-159 -57,-170 Z" fill="#6d3914" />
+        <path d="M-50,-198 Q-61,-196 -61,-180 L-59,-128 Q-58,-115 -44,-115 L-24,-117 Q-15,-119 -16,-134 L-19,-190 Q-21,-200 -32,-200 Z" fill="#12336b" />
+        <path d="M-53,-196 Q-40,-207 -21,-196 L-20,-168 Q-38,-159 -57,-170 Z" fill="#0a1f44" />
         <rect x={-42} y={-172} width={9} height={7} rx={1.5} fill={GOLD} />
-        <path d="M-55,-150 Q-38,-145 -20,-150" stroke="#f4e9dc" strokeOpacity={0.5} strokeWidth={1.1} strokeDasharray="2.5 3" fill="none" />
-        <path d="M-20,-197 Q-2,-208 12,-198 L10,-191 Q-1,-199 -19,-189 Z" fill="#4f3220" />
+        <path d="M-55,-150 Q-38,-145 -20,-150" stroke="#ffffff" strokeOpacity={0.5} strokeWidth={1.1} strokeDasharray="2.5 3" fill="none" />
+        <path d="M-20,-197 Q-2,-208 12,-198 L10,-191 Q-1,-199 -19,-189 Z" fill="#050d1f" />
 
         {/* pescoço */}
         <rect x={-1} y={-222} width={13} height={18} rx={4} fill={SKIN_D} />
@@ -188,7 +188,7 @@ export function Character({ gown = GOWN, withPackScroll = true, label }: { gown?
           <circle cx={-8} cy={-231.5} r={2.3} fill={GOLD} />
           <circle cx={14} cy={-235} r={4.6} fill="#b0603e" opacity={0.3} />
           <g data-p="eye">
-            <ellipse cx={20} cy={-246} rx={3.9} ry={2.9} fill="#fbf3e8" />
+            <ellipse cx={20} cy={-246} rx={3.9} ry={2.9} fill="#ffffff" />
             <circle cx={21.2} cy={-246} r={2.1} fill={HAIR} />
             <circle cx={21.8} cy={-246.9} r={0.65} fill="#fff" />
           </g>
@@ -203,16 +203,16 @@ export function Character({ gown = GOWN, withPackScroll = true, label }: { gown?
           {/* capelo */}
           <g data-p="cap">
             <path d="M-20,-262 Q2,-283 28,-262 L27,-256.5 Q2,-273 -19,-256.5 Z" fill={HAIR} />
-            <path d="M-36,-272 L6,-261 L46,-273 L46,-268.5 L6,-256.5 L-36,-267.5 Z" fill="#2e1b0b" />
+            <path d="M-36,-272 L6,-261 L46,-273 L46,-268.5 L6,-256.5 L-36,-267.5 Z" fill="#141c2e" />
             <path d="M-36,-272 L4,-285.5 L46,-273 L6,-261 Z" fill={HAIR} />
-            <path d="M-36,-272 L4,-285.5 L46,-273" stroke="#5a3a1c" strokeWidth={1.5} fill="none" strokeLinejoin="round" />
+            <path d="M-36,-272 L4,-285.5 L46,-273" stroke="#2a3a5c" strokeWidth={1.5} fill="none" strokeLinejoin="round" />
             <path d="M5,-273 Q26,-272.5 45,-272" stroke={GOLD} strokeWidth={1.7} fill="none" />
             <circle cx={5} cy={-273} r={2.6} fill={GOLD} />
             <g data-p="tassel">
               <path d="M45,-272 L45,-252" stroke={GOLD} strokeWidth={1.7} />
-              <rect x={41} y={-254} width={8} height={4.5} rx={1.6} fill="#a5823f" />
+              <rect x={41} y={-254} width={8} height={4.5} rx={1.6} fill="#8dbcf2" />
               <path d="M41.5,-250 L48.5,-250 L50.5,-231 L39.5,-231 Z" fill={GOLD} />
-              <path d="M42.5,-248 L41.8,-232 M45,-248 L45,-232 M47.5,-248 L48.2,-232" stroke="#a5823f" strokeWidth={0.8} />
+              <path d="M42.5,-248 L41.8,-232 M45,-248 L45,-232 M47.5,-248 L48.2,-232" stroke="#8dbcf2" strokeWidth={0.8} />
             </g>
           </g>
         </g>
@@ -220,7 +220,7 @@ export function Character({ gown = GOWN, withPackScroll = true, label }: { gown?
         {/* braço da frente */}
         <g data-p="armF">
           <path d="M-3,-202 Q-7,-176 -7,-150 Q6,-142 21,-150 Q19,-178 19,-200 Z" fill={gown} />
-          <path d="M-7,-151 Q6,-143 21,-151 L21,-146.5 Q6,-138.5 -7,-146.5 Z" fill="#ab7743" />
+          <path d="M-7,-151 Q6,-143 21,-151 L21,-146.5 Q6,-138.5 -7,-146.5 Z" fill="#1f5fbf" />
           <circle cx={7} cy={-140} r={6.6} fill={SKIN} />
         </g>
       </g>

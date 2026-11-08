@@ -73,7 +73,7 @@ Tem de parecer papelaria verdadeira de uma cerimónia de licenciatura: papel mar
 - Ecrã inteiro com o **canudo verdadeiro**, em 3D realista e não ilustrado:
   - papel espesso enrolado, fita de cetim cor café e selo de lacre caramelo com o monograma **JVD**;
   - está pousado sobre linho cor espresso.
-  - Uma etiqueta presa à fita diz «Para Gilberto e Talita».
+  - Uma etiqueta presa à fita diz «Para Ana e Paulo» (exemplo).
 - «Toque no selo para abrir». Depois do toque:
 
 | Tempo | O que acontece |
@@ -144,3 +144,19 @@ O sistema todo: links individuais, as duas etapas, o admin, o mapa, o `.ics` e a
 - **Fotografias da Juceline**: vais enviar. Vão para `documentos_detalhes/fotos/`, fora do repositório.
 - **Música de fundo**: sim, instrumental, com botão de pausa.
 - **Programa**: não há; a secção fica de fora.
+
+## 6. Escolha final (8 Nov 2026)
+
+- Foram feitas três propostas, fora do repositório (`propostas/`):
+  - **A**, diploma com fotografias;
+  - **B**, diploma sem fotografias;
+  - **C**, papelaria ao estilo da agência Bossa.
+- **Fica a B:**
+  - capa tipográfica com medalhão de guilhoché e o monograma JVD;
+  - a frase da placa do ISAF numa faixa espresso;
+  - fecho com selo branco gravado;
+  - **sem fotografias**.
+- **Local da festa: Residência Mateus Neto, Luanda.**
+  - Google Maps: https://maps.app.goo.gl/B94F3hHJkT7vXB8u7
+  - Coordenadas: -8.9872197, 13.1737619.
+  - A ficha do Google diz «R. 8 de Fevereiro, Lubango», mas as coordenadas são de Luanda. Confirmado: a festa é em Luanda, por isso não se usa essa morada.

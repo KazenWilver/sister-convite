@@ -2,6 +2,22 @@ import { EVENT } from "@/lib/config";
 import { findGuestByToken } from "@/lib/guests";
 import { store } from "@/lib/store";
 
+// A norma dos calendários pede linhas de até 75 bytes; as maiores continuam na linha seguinte, começada por espaço.
+function fold(line: string): string {
+  const enc = new TextEncoder();
+  const out: string[] = [];
+  let cur = "";
+  for (const ch of line) {
+    if (enc.encode(cur + ch).length > (out.length ? 74 : 75)) {
+      out.push(cur);
+      cur = "";
+    }
+    cur += ch;
+  }
+  out.push(cur);
+  return out.join("\r\n ");
+}
+
 // Ficheiro .ics para adicionar a festa ao calendário do telemóvel (iPhone/Android/Outlook).
 export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -9,7 +25,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
   if (!g || g.status !== "active") return new Response("Not found", { status: 404 });
   const s = await store.getSettings();
   const esc = (v: string) => v.replace(/[\\;,]/g, (m) => `\\${m}`).replace(/\n/g, "\\n");
-  const m = s.eventTime?.match(/(\d{1,2})\s*[h:.]\s*(\d{2})?/i);
+  const m = (s.eventTime || EVENT.time).match(/(\d{1,2})\s*[h:.]\s*(\d{2})?/i);
   const day = EVENT.dateISO.replace(/-/g, "");
   let when: string[];
   if (m) {
@@ -31,8 +47,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`,
     ...when,
     `SUMMARY:${esc(`Festa de licenciatura da ${EVENT.firstName}`)}`,
-    `DESCRIPTION:${esc(`Celebração da licenciatura de ${EVENT.graduate} em ${EVENT.course}.`)}`,
-    ...(s.address ? [`LOCATION:${esc(s.address)}`] : []),
+    `DESCRIPTION:${esc(`Celebração da licenciatura de ${EVENT.graduate} em ${EVENT.course}. Início às ${EVENT.timeLabel}.\nLocalização: ${EVENT.venueMaps}`)}`,
+    `LOCATION:${esc([s.venueName || EVENT.venueName, s.address || EVENT.city].join(", "))}`,
+    `GEO:${s.lat ?? EVENT.lat};${s.lng ?? EVENT.lng}`,
+    `URL:${EVENT.venueMaps}`,
     "BEGIN:VALARM",
     "TRIGGER:-P1D",
     "ACTION:DISPLAY",
@@ -40,7 +58,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     "END:VALARM",
     "END:VEVENT",
     "END:VCALENDAR",
-  ].join("\r\n");
+  ]
+    .map(fold)
+    .join("\r\n");
   return new Response(ics, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",

@@ -10,8 +10,9 @@ Guia para a sessão de publicação. Tudo já funciona em local; aqui só se lig
 ## 1. Supabase
 
 1. Criar um projecto novo, numa região perto de Angola (ex.: `eu-west` ou `eu-central`).
-2. Correr a migração `supabase/migrations/0001_init.sql` (SQL Editor ou `supabase db push`). Esta migração:
+2. No **SQL Editor**, colar todo o ficheiro `supabase/instalar.sql` e carregar em **Run** (são as migrações `0001` e `0002` juntas). Isto:
    - cria as tabelas `guests`, `event_settings` e `rsvp_log`;
+   - acrescenta os campos do convite único (dispositivos e entrada à porta);
    - **activa o RLS sem políticas** e retira as permissões a `anon` e `authenticated`, para que só a chave de serviço (no servidor) consiga ler e escrever.
 3. Copiar o **Project URL** e a **service_role key** (Settings → API). A service_role **nunca** vai para o browser nem para o GitHub.
 
@@ -60,7 +61,7 @@ npm run hash-password -- "palavra-passe-forte-do-admin"
    - dress code.
 2. **Importar**:
    - colar a lista de `documentos_detalhes/ListaDeConvidados.txt`;
-   - ver a pré-visualização: devem ser 59 convites e 76 pessoas;
+   - ver a pré-visualização: devem ser 62 convites e 79 pessoas;
    - confirmar.
 3. Rever cada convite (lugares, telefone, grupo) e depois usar **WhatsApp** em cada um. O botão abre a conversa com a mensagem pronta e marca o convite como enviado.
 4. Mais perto da data, em Definições, ligar **«Pedir a confirmação final»**. Aparece o botão **Lembrar** para quem só respondeu à etapa 1.
