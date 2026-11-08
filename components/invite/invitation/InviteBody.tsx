@@ -30,14 +30,6 @@ const SWATCHES = [
   { name: "Espresso", hex: "#4c2b08" },
 ];
 
-const LEDGER = [
-  { d: "Cafés (espresso, moca, caramelo…)", deb: "∞", cred: "" },
-  { d: "Noites de estudo", deb: "muitas", cred: "" },
-  { d: "Frequências e exames", deb: "todos", cred: "" },
-  { d: "Apoio da família e dos amigos", deb: "", cred: "sempre" },
-  { d: "Fé e persistência", deb: "", cred: "inabaláveis" },
-];
-
 // Direcções de entrada (x/y em fracções do ecrã, rotação em graus).
 const FROM: Record<string, { x: number; y: number; r: number }> = {
   left: { x: -0.45, y: 0.05, r: -7 },
@@ -125,7 +117,6 @@ function mapLinks(lat: number, lng: number, name: string) {
 
 export function InviteBody({ token, guest, event, active }: { token: string; guest: PublicGuest; event: PublicEvent; active: boolean }) {
   const root = useRef<HTMLElement>(null);
-  const [posted, setPosted] = useState<boolean[]>(() => LEDGER.map(() => false));
   const [gown, setGown] = useState(SWATCHES[3]);
   const [copied, setCopied] = useState(false);
   const [os, setOs] = useState<"ios" | "android" | "other">("other");
@@ -323,21 +314,6 @@ Localização: ${EVENT.venueMaps}`,
     };
   }, [active]);
 
-  const allPosted = posted.every(Boolean);
-  const post = (i: number) => {
-    if (posted[i]) return;
-    sfx.tick(0.32);
-    setPosted((p) => p.map((v, k) => (k === i ? true : v)));
-  };
-  useEffect(() => {
-    if (allPosted) {
-      sfx.stamp(0.55);
-      const el = document.querySelector(".ledger-result");
-      const r = el?.getBoundingClientRect();
-      if (r) burst(r.left + r.width / 2, r.top + 20, 70);
-    }
-  }, [allPosted]);
-
   const tossCap = () => {
     const cap = document.querySelector<SVGGElement>('.final-girl [data-p="cap"]');
     if (!cap || gsap.isTweening(cap)) return;
@@ -450,56 +426,9 @@ Localização: ${EVENT.venueMaps}`,
         <CharacterSvg className="walker" />
       </section>
 
-      {/* 3 · Balancete */}
-      <section className="sheet">
-        <Wave fill="var(--blue-600)" flip />
-        <span className="shape shape-a" data-speed="1.4" aria-hidden="true" />
-        <span className="shape shape-b" data-speed="-0.8" aria-hidden="true" />
-        <p className="kicker" data-from="left">
-          Contas feitas
-        </p>
-        <h2 className="sec-title" data-kin="up">
-          Balancete da licenciatura
-        </h2>
-        <p className="sec-sub" data-from="right">
-          Toca em cada linha para fazer o lançamento.
-        </p>
-        <div className="ledger" data-from="dr" role="table" aria-label="Balancete">
-          <div className="ledger-head" role="row">
-            <span role="columnheader">Descrição</span>
-            <span role="columnheader">Débito</span>
-            <span role="columnheader">Crédito</span>
-          </div>
-          {LEDGER.map((r, i) => (
-            <button key={r.d} role="row" className={posted[i] ? "ledger-row on" : "ledger-row"} onClick={() => post(i)} aria-pressed={posted[i]}>
-              <span role="cell">{r.d}</span>
-              <span role="cell" className="num">
-                {posted[i] ? r.deb : r.deb ? "·" : ""}
-              </span>
-              <span role="cell" className="num">
-                {posted[i] ? r.cred : r.cred ? "·" : ""}
-              </span>
-            </button>
-          ))}
-          <div className={allPosted ? "ledger-result on" : "ledger-result"} role="row">
-            <span role="cell">Resultado do exercício</span>
-            <strong role="cell">{allPosted ? "Licenciada" : "…"}</strong>
-          </div>
-        </div>
-        {!allPosted && (
-          <button className="cta-nudge" onClick={() => LEDGER.forEach((_, i) => setTimeout(() => post(i), i * 160))}>
-            <span className="cta-ring" aria-hidden="true" />
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 12h12M12 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Lançar tudo
-          </button>
-        )}
-        <Wave fill="var(--navy-900)" />
-      </section>
-
-      {/* 4 · A data (revelação com o scroll) */}
+      {/* 3 · A data (revelação com o scroll) */}
       <section className="when">
+        <Wave fill="var(--blue-600)" flip />
         <DateReveal active={active} />
         <div className="when-after">
           {!past && <Countdown target={target} />}
@@ -515,21 +444,25 @@ Localização: ${EVENT.venueMaps}`,
         <Wave fill="var(--white)" />
       </section>
 
-      {/* 5 · Dress code */}
+      {/* 4 · Dress code */}
       {event.dressCode && (
         <section className="dress">
           <span className="shape shape-c" data-speed="1.2" aria-hidden="true" />
           <p className="kicker" data-from="right">
-            Dress code
+            Dress code obrigatório
           </p>
           <h2 className="sec-title" data-kin="right">
-            Tons de café
+            Só tons de café
           </h2>
-          {event.dressCodeNote && (
-            <p className="sec-sub" data-from="left">
-              {event.dressCodeNote}
+          <div className="dress-rule" data-from="left">
+            <p className="dress-rule-big">
+              Na festa, só se pode vir vestido com <b>estas cores</b>.
             </p>
-          )}
+            <p className="dress-rule-small">
+              {P ? "Escolham" : "Escolhe"} uma delas ou {P ? "combinem" : "combina"} várias: baunilha, caramelo, amêndoa, café, moca ou espresso.
+              {" "}Outras cores ficam para outra ocasião.
+            </p>
+          </div>
           <div className="dress-stage">
             <div data-from="dl">
               <CharacterSvg className="dress-girl" gown={gown.hex} />
@@ -552,13 +485,13 @@ Localização: ${EVENT.venueMaps}`,
             </div>
           </div>
           <p className="dress-tip" data-from="up">
-            Toca numa cor para a Juceline a experimentar.
+            Toca numa cor para ver a Juceline vestida com ela.
           </p>
           <Wave fill="var(--blue-700)" />
         </section>
       )}
 
-      {/* 6 · Local */}
+      {/* 5 · Local */}
       <section className="where">
         <span className="shape shape-d" data-speed="-1" aria-hidden="true" />
         <p className="kicker" data-from="left">
@@ -620,7 +553,7 @@ Localização: ${EVENT.venueMaps}`,
         <Wave fill="var(--blue-50)" />
       </section>
 
-      {/* 7 · RSVP */}
+      {/* 6 · RSVP */}
       <section className="reply">
         <span className="shape shape-e" data-speed="0.9" aria-hidden="true" />
         <p className="kicker" data-from="right">
@@ -635,7 +568,7 @@ Localização: ${EVENT.venueMaps}`,
         <Wave fill="var(--navy-950)" />
       </section>
 
-      {/* 8 · Final */}
+      {/* 7 · Final */}
       <section
         className="final"
         onPointerDown={(e) => (swipe.current = e.clientY)}

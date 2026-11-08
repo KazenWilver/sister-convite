@@ -4,14 +4,6 @@ import type { PublicGuest } from "@/lib/guests";
 import * as sfx from "@/lib/sound";
 import { burst } from "../shared/Confetti";
 
-// Sugestões para quem não sabe o que escrever (a caixa começa vazia).
-const IDEAS = [
-  "Parabéns, doutora! Muito orgulho em ti.",
-  "Mereces cada conquista. Felicidades!",
-  "Que esta seja só a primeira de muitas vitórias.",
-  "Um brinde à nova licenciada!",
-];
-
 async function send(token: string, body: Record<string, unknown>): Promise<PublicGuest> {
   const res = await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, ...body }) });
   const data = (await res.json().catch(() => ({}))) as { guest?: PublicGuest; error?: string };
@@ -93,8 +85,6 @@ export function Rsvp({ token, initial }: { token: string; initial: PublicGuest }
   const [seats, setSeats] = useState(initial.attending || initial.seats);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [msg, setMsg] = useState(initial.message ?? "");
-  const [msgSent, setMsgSent] = useState(Boolean(initial.message));
   const stampRef = useRef<HTMLDivElement>(null);
   const P = g.plural;
 
@@ -229,27 +219,6 @@ export function Rsvp({ token, initial }: { token: string; initial: PublicGuest }
             {error}
           </p>
         )}
-      </div>
-
-
-      <div className="note">
-        <label htmlFor="msg">Deixa uma mensagem para a Juceline</label>
-        <p className="note-hint">Escreve à tua maneira ou toca numa sugestão e muda o que quiseres.</p>
-        <div className="note-ideas" role="group" aria-label="Sugestões de mensagem">
-          {IDEAS.map((t) => (
-            <button key={t} type="button" className={msg === t ? "on" : ""} onClick={() => (setMsg(t), setMsgSent(false), sfx.tick(0.2))}>
-              {t}
-            </button>
-          ))}
-        </div>
-        <textarea id="msg" rows={3} maxLength={600} value={msg} onChange={(e) => (setMsg(e.target.value), setMsgSent(false))} placeholder="A tua mensagem…" />
-        <button
-          className="btn btn-dark"
-          disabled={busy || !msg.trim() || msgSent}
-          onClick={() => run({ action: "message", message: msg }, () => (setMsgSent(true), sfx.unfold(0.3)))}
-        >
-          {msgSent ? "Mensagem entregue ✓" : "Enviar mensagem"}
-        </button>
       </div>
     </div>
   );

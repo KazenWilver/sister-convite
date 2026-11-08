@@ -463,98 +463,6 @@
   overflow: visible;
 }
 
-/* 3 · Balancete ------------------------------------------------------ */
-.invite .sheet {
-  background: var(--blue-50);
-}
-.ledger {
-  width: min(560px, 100%);
-  rotate: 1.5deg;
-  margin-top: 6px;
-  padding: 10px 16px 14px;
-  background: var(--white);
-  border-radius: 6px;
-  box-shadow: 0 40px 60px -36px rgba(10, 31, 68, 0.55), 0 0 0 1px rgba(10, 31, 68, 0.06);
-}
-.ledger-head {
-  display: grid;
-  grid-template-columns: 1fr 74px 84px;
-  gap: 8px;
-  padding: 10px 0;
-  border-bottom: 2px solid var(--navy-900);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--blue-700);
-}
-.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.ledger-row {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 74px 84px;
-  gap: 8px;
-  align-items: center;
-  min-height: 52px;
-  padding: 8px 0;
-  border: none;
-  border-bottom: 1px dashed rgba(10, 31, 68, 0.2);
-  background: none;
-  text-align: left;
-  font-size: 15.5px;
-  color: var(--navy-900);
-}
-.ledger-row .num {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 17px;
-  color: rgba(10, 31, 68, 0.35);
-}
-.ledger-row.on .num {
-  color: var(--blue-600);
-  animation: post 0.45s var(--ease-spring);
-}
-@keyframes post {
-  from {
-    transform: translateY(8px) scale(0.6);
-    opacity: 0;
-  }
-}
-.ledger-result {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 14px 0 2px;
-  border-top: 3px double var(--navy-900);
-  margin-top: 6px;
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.ledger-result strong {
-  font-family: var(--font-display);
-  font-size: 24px;
-  letter-spacing: 0;
-  text-transform: none;
-  color: rgba(10, 31, 68, 0.35);
-}
-.ledger-result.on strong {
-  color: var(--blue-600);
-}
-@media (max-width: 420px) {
-  .ledger-head,
-  .ledger-row {
-    grid-template-columns: 1fr 58px 76px;
-  }
-  .ledger-row {
-    font-size: 14.5px;
-  }
-}
-
 /* 4 · A data --------------------------------------------------------- */
 .invite .when {
   --kick: var(--blue-300);
@@ -765,6 +673,36 @@
 }
 .dress .sec-title {
   max-width: 9ch;
+}
+/* a regra do dress code: grande e sem margem para dúvidas */
+.dress-rule {
+  width: min(560px, 100%);
+  margin: 4px 0 22px;
+  padding: clamp(18px, 4.5vw, 26px) clamp(18px, 5vw, 28px);
+  border-radius: 18px;
+  background: var(--navy-900);
+  color: var(--white);
+  text-align: left;
+  box-shadow: 0 24px 40px -28px rgba(10, 31, 68, 0.8);
+}
+.dress-rule-big {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(24px, 7vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.dress-rule-big b {
+  color: #e8c9a6;
+  font-weight: 700;
+}
+.dress-rule-small {
+  margin: 10px 0 0;
+  font-size: clamp(15px, 4vw, 17px);
+  line-height: 1.5;
+  color: var(--blue-100);
 }
 .dress-stage {
   display: flex;
@@ -1266,62 +1204,6 @@
     transform: scale(2.3);
     opacity: 0;
   }
-}
-.note {
-  margin-top: 26px;
-  display: grid;
-  gap: 10px;
-  text-align: left;
-}
-.note label {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 600;
-  font-size: 22px;
-  color: var(--navy-800);
-}
-.note textarea {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(10, 31, 68, 0.25);
-  background: var(--white);
-  resize: vertical;
-  outline: none;
-  line-height: 1.45;
-}
-.note textarea:focus {
-  border-color: var(--blue-600);
-  box-shadow: 0 0 0 3px rgba(31, 95, 191, 0.2);
-}
-.note-hint {
-  margin: -4px 0 0;
-  font-size: 15px;
-  color: rgba(10, 31, 68, 0.75);
-}
-.note-ideas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.note-ideas button {
-  min-height: 40px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(31, 95, 191, 0.35);
-  background: var(--white);
-  color: var(--navy-900);
-  font: 600 14px/1.25 var(--font-body);
-  text-align: left;
-  transition: background-color 0.2s, color 0.2s, transform 0.16s var(--ease-out);
-}
-.note-ideas button:active {
-  transform: scale(0.97);
-}
-.note-ideas button.on {
-  background: var(--navy-900);
-  border-color: var(--navy-900);
-  color: var(--white);
 }
 
 /* 8 · Final ---------------------------------------------------------- */
