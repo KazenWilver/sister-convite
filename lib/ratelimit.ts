@@ -19,3 +19,17 @@ export function rateLimit(key: string, max: number, windowMs: number): boolean {
 export function clientIp(req: Request): string {
   return req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "local";
 }
+
+/** Só consulta: true se a chave já esgotou as tentativas nesta janela (não conta este pedido). */
+export function isLimited(key: string, max: number): boolean {
+  const b = buckets.get(key);
+  return !!b && b.reset >= Date.now() && b.count >= max;
+}
+
+/** Regista uma tentativa falhada para a chave. */
+export function recordHit(key: string, windowMs: number): void {
+  const now = Date.now();
+  const b = buckets.get(key);
+  if (!b || b.reset < now) buckets.set(key, { count: 1, reset: now + windowMs });
+  else b.count++;
+}

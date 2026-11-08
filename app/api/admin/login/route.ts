@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { adminPasswordConfigured, createSession, verifyPassword } from "@/lib/crypto";
-import { clientIp, rateLimit } from "@/lib/ratelimit";
+import { clientIp, isLimited, recordHit } from "@/lib/ratelimit";
 import { store } from "@/lib/store";
 
 const SESSION_DAYS = 30;
@@ -19,7 +19,9 @@ async function failsToday(): Promise<number> {
 }
 
 export async function POST(req: Request) {
-  if (!rateLimit(`login:${clientIp(req)}`, 5, 10 * 60_000)) {
+  // Por endereço: 5 PINs errados em 10 minutos (só os errados contam).
+  const ipKey = `login:${clientIp(req)}`;
+  if (isLimited(ipKey, 5)) {
     return NextResponse.json({ error: "Demasiadas tentativas. Espera 10 minutos." }, { status: 429 });
   }
   if (!adminPasswordConfigured()) {
@@ -38,6 +40,7 @@ export async function POST(req: Request) {
   const { password } = (await req.json().catch(() => ({}))) as { password?: string };
   await new Promise((r) => setTimeout(r, 400)); // abranda ataques de força bruta
   if (!password || !verifyPassword(password)) {
+    recordHit(ipKey, 10 * 60_000);
     await store.addLoginFail().catch((e) => console.error("Registo de tentativa falhou:", e));
     return NextResponse.json({ error: "PIN incorrecto." }, { status: 401 });
   }
