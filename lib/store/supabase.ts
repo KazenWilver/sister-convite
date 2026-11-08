@@ -130,4 +130,13 @@ export const supabaseStore: Store = {
   async log(guestId, action, value) {
     check(await db().from("rsvp_log").insert({ guest_id: guestId, action, value }));
   },
+  async countLoginFails(sinceIso) {
+    const res = await db().from("admin_login_fails").select("id", { count: "exact", head: true }).gte("at", sinceIso);
+    if (res.error) throw new Error(`Supabase: ${res.error.message}`);
+    return res.count ?? 0;
+  },
+  async addLoginFail() {
+    check(await db().from("admin_login_fails").insert({}));
+    await db().from("admin_login_fails").delete().lt("at", new Date(Date.now() - 2 * 864e5).toISOString());
+  },
 };

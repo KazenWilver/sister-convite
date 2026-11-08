@@ -8,6 +8,7 @@ interface Db {
   guests: Guest[];
   settings: Settings;
   log: LogEntry[];
+  loginFails?: string[];
 }
 
 const FILE = path.join(process.cwd(), ".data", "db.json");
@@ -91,6 +92,15 @@ export const localStore: Store = {
   log(guestId, action, value) {
     return tx((db) => {
       db.log.push({ guestId, action, value, at: new Date().toISOString() });
+    });
+  },
+  async countLoginFails(sinceIso) {
+    return ((await read()).loginFails ?? []).filter((at) => at >= sinceIso).length;
+  },
+  addLoginFail() {
+    return tx((db) => {
+      const old = new Date(Date.now() - 2 * 864e5).toISOString();
+      db.loginFails = [...(db.loginFails ?? []).filter((at) => at >= old), new Date().toISOString()];
     });
   },
 };

@@ -77,4 +77,7 @@ export interface Store {
   updateSettings(patch: Partial<Settings>): Promise<Settings>;
   log(guestId: string, action: string, value: string | null): Promise<void>;
   listLog(limit: number): Promise<LogEntry[]>;
+  /** Tentativas erradas de entrar no painel desde a data indicada (todas as origens). */
+  countLoginFails(sinceIso: string): Promise<number>;
+  addLoginFail(): Promise<void>;
 }

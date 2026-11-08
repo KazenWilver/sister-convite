@@ -23,13 +23,13 @@ npm run secrets
 ```
 
 ```bash
-npm run hash-password -- "palavra-passe-forte-do-admin"
+npm run hash-password -- "1234"
 ```
 
 - `secrets` gera `TOKEN_ENC_KEY` e `SESSION_SECRET`.
 - `hash-password` gera `ADMIN_PASSWORD_HASH` (formato `scrypt:salt:hash`).
 - Usar valores **novos** em produção e não reaproveitar os de `.env.local`.
-- Guardar a palavra-passe do admin num gestor de palavras-passe.
+- Guardar o PIN do admin num sítio seguro. Entrar dura 30 dias por aparelho; depois de 10 PINs errados em 24 h o painel bloqueia até ao dia seguinte (para desbloquear antes: Supabase → Table Editor → `admin_login_fails` → apagar as linhas).
 
 ## 3. Vercel
 

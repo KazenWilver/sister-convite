@@ -1,8 +1,8 @@
 import { randomBytes, scryptSync } from "node:crypto";
 
 const password = process.argv[2];
-if (!password || password.length < 10) {
-  console.error('Uso: npm run hash-password -- "palavra-passe com pelo menos 10 caracteres"');
+if (!password || password.length < 4) {
+  console.error('Uso: npm run hash-password -- "PIN com pelo menos 4 dígitos"');
   process.exit(1);
 }
 const salt = randomBytes(16).toString("hex");
