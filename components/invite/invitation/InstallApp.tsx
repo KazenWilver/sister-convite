@@ -9,6 +9,8 @@ import * as sfx from "@/lib/sound";
 
 type PromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 type Os = "ios" | "android" | "other";
+/** No iPhone o botão «Partilhar» muda de sítio conforme o browser. */
+type IosBrowser = "safari" | "chrome" | "other";
 
 function ShareIcon() {
   return (
@@ -38,6 +40,7 @@ function DotsIcon() {
 
 export function InstallApp({ plural }: { plural: boolean }) {
   const [os, setOs] = useState<Os>("other");
+  const [iosBrowser, setIosBrowser] = useState<IosBrowser>("safari");
   const [installed, setInstalled] = useState(false);
   const [inApp, setInApp] = useState(false);
   const [canPrompt, setCanPrompt] = useState(false);
@@ -48,6 +51,7 @@ export function InstallApp({ plural }: { plural: boolean }) {
     const ua = navigator.userAgent;
     const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     setOs(ios ? "ios" : /Android/i.test(ua) ? "android" : "other");
+    setIosBrowser(/CriOS/i.test(ua) ? "chrome" : /FxiOS|EdgiOS|OPiOS|OPT\//i.test(ua) ? "other" : "safari");
     // WhatsApp, Instagram, Facebook… abrem o link num browser interno que não instala nada
     setInApp(/FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)|GSA\//i.test(ua));
     const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
@@ -123,8 +127,16 @@ export function InstallApp({ plural }: { plural: boolean }) {
             <button className="install-close" onClick={() => setHelp(false)} aria-label="Fechar">
               ×
             </button>
-            <p className="install-kicker">{os === "ios" ? "iPhone e iPad" : os === "android" ? "Android" : "No telemóvel"}</p>
+            <p className="install-kicker">
+              {os === "ios" ? (iosBrowser === "chrome" ? "iPhone · Chrome" : iosBrowser === "safari" ? "iPhone · Safari" : "iPhone") : os === "android" ? "Android" : "No telemóvel"}
+            </p>
             <h3 id="install-h">São só três toques</h3>
+
+            {os === "ios" && iosBrowser === "other" && !inApp && (
+              <p className="install-warn">
+                Neste browser pode não aparecer a opção. Se não a encontrares, copia o link, abre-o no <b>Safari</b> e segue estes passos.
+              </p>
+            )}
 
             {inApp && (
               <p className="install-warn">
@@ -141,7 +153,15 @@ export function InstallApp({ plural }: { plural: boolean }) {
                     <ShareIcon />
                   </span>
                   <span>
-                    Toca no botão <b>Partilhar</b>, na barra do Safari (em baixo ou em cima).
+                    {iosBrowser === "chrome" ? (
+                      <>
+                        Toca no botão <b>Partilhar</b>, ao lado do endereço, no canto de cima à direita.
+                      </>
+                    ) : (
+                      <>
+                        Toca no botão <b>Partilhar</b>, na barra do Safari (em baixo ou em cima).
+                      </>
+                    )}
                   </span>
                 </li>
                 <li>
