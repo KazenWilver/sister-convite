@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth";
-import { createSession, verifyPassword } from "@/lib/crypto";
+import { adminPasswordConfigured, createSession, verifyPassword } from "@/lib/crypto";
 import { clientIp, rateLimit } from "@/lib/ratelimit";
 import { store } from "@/lib/store";
 
@@ -21,6 +21,13 @@ async function failsToday(): Promise<number> {
 export async function POST(req: Request) {
   if (!rateLimit(`login:${clientIp(req)}`, 5, 10 * 60_000)) {
     return NextResponse.json({ error: "Demasiadas tentativas. Espera 10 minutos." }, { status: 429 });
+  }
+  if (!adminPasswordConfigured()) {
+    console.error("ADMIN_PASSWORD_HASH em falta ou mal formada.");
+    return NextResponse.json(
+      { error: "O PIN do painel ainda não está configurado no servidor (variável ADMIN_PASSWORD_HASH na Vercel)." },
+      { status: 503 },
+    );
   }
   if ((await failsToday()) >= MAX_FAILS_PER_DAY) {
     return NextResponse.json(

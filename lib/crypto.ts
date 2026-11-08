@@ -56,13 +56,28 @@ export function deviceTag(raw: string): string {
   return createHash("sha256").update(`disp:${raw}`).digest("hex").slice(0, 10);
 }
 
+/** Lê ADMIN_PASSWORD_HASH tolerando enganos comuns ao colar na Vercel (nome à frente, aspas, espaços). */
+function storedPasswordHash(): string | null {
+  const raw = process.env.ADMIN_PASSWORD_HASH;
+  if (!raw) return null;
+  const v = raw
+    .trim()
+    .replace(/^ADMIN_PASSWORD_HASH\s*=\s*/, "")
+    .replace(/^["']|["']$/g, "")
+    .trim();
+  return /^scrypt:[0-9a-f]{16,}:[0-9a-f]{64,}$/i.test(v) ? v : null;
+}
+
+export function adminPasswordConfigured(): boolean {
+  return storedPasswordHash() !== null;
+}
+
 export function verifyPassword(password: string): boolean {
-  const stored = process.env.ADMIN_PASSWORD_HASH;
+  const stored = storedPasswordHash();
   if (!stored) return false;
-  const [algo, salt, hash] = stored.split(":");
-  if (algo !== "scrypt" || !salt || !hash) return false;
+  const [, salt, hash] = stored.split(":");
   const expected = Buffer.from(hash, "hex");
-  const actual = scryptSync(password, salt, expected.length);
+  const actual = scryptSync(password.trim(), salt, expected.length);
   return timingSafeEqual(expected, actual);
 }
 
