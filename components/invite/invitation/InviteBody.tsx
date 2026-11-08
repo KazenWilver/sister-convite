@@ -315,6 +315,26 @@ Localização: ${EVENT.venueMaps}`,
   // Nome do local numa linha e o link do mapa noutra: colado no WhatsApp, o link fica clicável e mostra o mapa.
   const mapLink = event.lat != null && event.lng != null ? `https://maps.google.com/?q=${event.lat},${event.lng}` : "";
   const copyText = [`${venue}, ${event.address || EVENT.city}`, mapLink].filter(Boolean).join("\n");
+  // Táxis (Yango, Heetch): nenhum dos dois publica um link que abra a app já com o destino.
+  // Android: abre a app se estiver instalada (senão, a Play Store). iPhone: abre a página da App Store,
+  // onde aparece «Abrir» se já estiver instalada. Ao tocar, o nome do local fica copiado para colar em «Para onde?».
+  const rideStore = (pkg: string, ios: string) =>
+    os === "android"
+      ? `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${pkg};S.browser_fallback_url=${encodeURIComponent(`https://play.google.com/store/apps/details?id=${pkg}`)};end`
+      : os === "ios"
+        ? `https://apps.apple.com/app/${ios}`
+        : `https://play.google.com/store/apps/details?id=${pkg}`;
+  const rides = [
+    { k: "yango", label: "Yango", href: rideStore("com.yandex.yango", "id1437157286") },
+    { k: "heetch", label: "Heetch", href: rideStore("com.heetch", "id693137280") },
+  ];
+  const [rideCopied, setRideCopied] = useState(false);
+  const copyForRide = () => {
+    navigator.clipboard?.writeText(`${venue}, ${event.address || EVENT.city}`).then(
+      () => setRideCopied(true),
+      () => undefined,
+    );
+  };
 
   return (
     <main className="invite" ref={root} aria-hidden={!active}>
@@ -466,6 +486,25 @@ Localização: ${EVENT.venueMaps}`,
                 ))}
               </div>
               <p className="where-help">Se a aplicação não estiver instalada, abre a versão no browser.</p>
+              <p className="where-lead where-ride">Ou pede um carro:</p>
+              <div className="apps apps-ride">
+                {rides.map((a) => (
+                  <a key={a.k} className={`app app-${a.k}`} href={a.href} onClick={copyForRide} {...(a.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="app-logo" src={`/maps/${a.k}.png`} alt="" width={30} height={30} aria-hidden="true" />
+                    {a.label}
+                  </a>
+                ))}
+              </div>
+              <p className="where-help" aria-live="polite">
+                {rideCopied ? (
+                  <>
+                    <b>Nome do local copiado.</b> Na aplicação, cola-o em «Para onde?».
+                  </>
+                ) : (
+                  "Ao tocar, o nome do local fica copiado para colares no destino."
+                )}
+              </p>
               <button
                 className={copied ? "cta-nudge light done" : "cta-nudge light"}
                 onClick={async () => {
